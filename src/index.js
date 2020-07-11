@@ -47,6 +47,10 @@ import "./assets/scss/argon-dashboard-react.scss";
 
 import AdminLayout from "./layouts/Admin";
 import AuthLayout from "./layouts/Auth";
+import PrivateRoute from "./components/PrivateRoute";
+import { AuthenticationContextProvider } from "./contexts/AuthenticationContext";
+import { ApolloProvider } from "@apollo/react-hooks";
+import apolloClient from "./libs/apollo";
 
 library.add(
   faFacebookF,
@@ -65,20 +69,23 @@ library.add(
   faFolderOpen,
   faDownload,
   faArrowUp,
-  faArrowDown,
+  faArrowDown
 );
 
-//logger.init();
-
 ReactDOM.render(
-  <BrowserRouter>
-    <Switch>
-      {/* <Route path="/admin" component={AdminLayout} />
-      <Route path="/auth" component={AuthLayout} /> */}
-      <Route path="/admin" render={(props) => <AdminLayout {...props} />} />
-      <Route path="/auth" render={(props) => <AuthLayout {...props} />} />
-      <Redirect from="/" to="/admin/files" />
-    </Switch>
-  </BrowserRouter>,
+  <ApolloProvider client={apolloClient}>
+    <BrowserRouter>
+      <AuthenticationContextProvider>
+        <Switch>          
+          <PrivateRoute
+            path="/admin"
+            render={(props) => <AdminLayout {...props} />}
+          />
+          <Route path="/auth" render={(props) => <AuthLayout {...props} />} />
+          <Redirect from="/" to="/admin/files" />
+        </Switch>
+      </AuthenticationContextProvider>
+    </BrowserRouter>
+  </ApolloProvider>,
   document.getElementById("root")
 );

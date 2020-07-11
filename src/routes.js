@@ -31,6 +31,7 @@ var routes = [
     icon: "ni ni-tv-2 text-primary",
     component: Index,
     layout: "/admin",
+    isPrivate: true,
   },
   {
     path: "/files",
@@ -39,6 +40,7 @@ var routes = [
     component: Files,
     layout: "/admin",
     displayActionBar: false,
+    isPrivate: true,
   },
   {
     path: "/icons",
@@ -46,6 +48,7 @@ var routes = [
     icon: "ni ni-planet text-blue",
     component: Icons,
     layout: "/admin",
+    isPrivate: true,
   },
   {
     path: "/maps",
@@ -53,6 +56,7 @@ var routes = [
     icon: "ni ni-pin-3 text-orange",
     component: Maps,
     layout: "/admin",
+    isPrivate: true,
   },
   {
     path: "/user-profile",
@@ -60,6 +64,7 @@ var routes = [
     icon: "ni ni-single-02 text-yellow",
     component: Profile,
     layout: "/admin",
+    isPrivate: true,
   },
   {
     path: "/tables",
@@ -67,6 +72,7 @@ var routes = [
     icon: "ni ni-bullet-list-67 text-red",
     component: Tables,
     layout: "/admin",
+    isPrivate: true,
   },
   {
     path: "/login",

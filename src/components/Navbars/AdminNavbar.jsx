@@ -15,7 +15,7 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React from "react";
+import React, { useContext } from "react";
 import { Link, Redirect } from "react-router-dom";
 import { toast } from "react-toastify";
 import http from "../../services/httpService";
@@ -37,46 +37,12 @@ import {
   Container,
   Media,
 } from "reactstrap";
+import { AuthenticationContext } from "../../contexts/AuthenticationContext";
 
-class AdminNavbar extends React.Component {
-  state = {
-    inputField: "",
-    term: "",
-    results: [],
-    loading: false,
-    message: "",
-    redirect: false,
-  };
-
-  handleChange = (e) => {
-    this.setState({ redirect: false, term: e.target.value });
-  };
-
-  handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const numberOfChar = [...this.state.term];
-
-    let url = `http://localhost:5000/api/searches?s=${encodeURI(
-      this.state.term
-    )}`;
-
-    if (numberOfChar.length >= 3) {
-      await http
-        .get(url)
-        .then((response) => {
-          this.setState({ redirect: true, results: response.data });
-          console.log(response.data);
-        })
-        .catch((error) => {
-          console.error("There was an error:", error);
-        });
-    } else {
-      toast.warn("At least 3 charaters required to search.");
-    }
-  };
-
-  render() {
+const AdminNavbar = ({ 
+  brandText
+}) => {
+  const { user } = useContext(AuthenticationContext);
     return (
       <>
         <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
@@ -85,11 +51,10 @@ class AdminNavbar extends React.Component {
               className="h4 mb-0 text-white text-uppercase d-none d-lg-inline-block"
               to="/"
             >
-              {this.props.brandText}
+              {brandText}
             </Link>
             <Form
-              className="navbar-search navbar-search-dark form-inline mr-3 d-none d-md-flex ml-lg-auto"
-              onSubmit={this.handleSubmit}
+              className="navbar-search navbar-search-dark form-inline mr-3 d-none d-md-flex ml-lg-auto"              
             >
               <FormGroup className="mb-0">
                 <InputGroup className="input-group-alternative">
@@ -102,21 +67,11 @@ class AdminNavbar extends React.Component {
                     placeholder="Search"
                     name="s"
                     id="s"
-                    type="search"
-                    value={this.state.term}
-                    onChange={this.handleChange}
+                    type="search"                    
                   />
                 </InputGroup>
               </FormGroup>
-            </Form>
-            {this.state.redirect && (
-              <Redirect
-                to={{
-                  pathname: `/admin/search/${this.state.term}`,
-                  state: { results: this.state.results },
-                }}
-              />
-            )}
+            </Form>          
             <Nav className="align-items-center d-none d-md-flex" navbar>
               <UncontrolledDropdown nav>
                 <DropdownToggle className="pr-0" nav>
@@ -129,7 +84,7 @@ class AdminNavbar extends React.Component {
                     </span>
                     <Media className="ml-2 d-none d-lg-block">
                       <span className="mb-0 text-sm font-weight-bold">
-                        Jessica Jones
+                        {user && user.name}
                       </span>
                     </Media>
                   </Media>
@@ -169,7 +124,6 @@ class AdminNavbar extends React.Component {
         </Navbar>
       </>
     );
-  }
 }
 
 export default AdminNavbar;
