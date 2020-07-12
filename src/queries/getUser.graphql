@@ -1,7 +1,12 @@
 query Profile {
   profile {
-    id
-    name
+    name,
+    id,
     email
+    role{
+      permissions,
+      type,
+      is_archive
+    }
   }
 }

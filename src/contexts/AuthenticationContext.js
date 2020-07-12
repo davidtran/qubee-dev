@@ -36,6 +36,7 @@ export const AuthenticationContextProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem(JWT_STORAGE_KEY);
+    console.log(token, 11);
     if (token) {
       getUserQuery();
     }

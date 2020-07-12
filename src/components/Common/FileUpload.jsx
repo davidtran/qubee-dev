@@ -91,36 +91,7 @@ function FileUpload({ getFiles, toggle }) {
         onprocessfiles={handleProcessedFiles}
         maxFiles={10}
         server={process.env.REACT_APP_API_URL + "/files"}
-      ></FilePond>
-      {/* <Form onSubmit={this.handleSubmit}>
-          <div className="progress-wrapper" style={{ paddingTop: 0 }}>
-            <div className="progress-info">
-              <div className="progress-label">
-                <span>{this.state.taskCompleted}</span>
-              </div>
-              <div className="progress-percentage">
-                <span>{Math.round(loaded, 2)}%</span>
-              </div>
-            </div>
-            <Progress max="100" value={loaded} color="success" />
-          </div>
-          <div className="custom-file mb-4">
-            <Input
-              className="custom-file-input"
-              type="file"
-              multiple
-              name="mediaFiles"
-              id="mediaFiles"
-              onChange={this.handleFileChange}
-            />
-            <Label className="custom-file-label" htmlFor="mediaFiles">
-              {filenames}
-            </Label>
-          </div>
-          <Button color="primary" type="submit" disabled={!isEnabled}>
-            Upload
-          </Button>
-        </Form> */}
+      ></FilePond>      
     </>
   );
 }

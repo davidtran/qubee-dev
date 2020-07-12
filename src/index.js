@@ -51,6 +51,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import { AuthenticationContextProvider } from "./contexts/AuthenticationContext";
 import { ApolloProvider } from "@apollo/react-hooks";
 import apolloClient from "./libs/apollo";
+import { FileContextProvider } from "./contexts/FileListContext";
 
 library.add(
   faFacebookF,
@@ -79,7 +80,11 @@ ReactDOM.render(
         <Switch>          
           <PrivateRoute
             path="/admin"
-            render={(props) => <AdminLayout {...props} />}
+            render={(props) => (
+              <FileContextProvider>
+                <AdminLayout {...props} />
+              </FileContextProvider>
+            )}
           />
           <Route path="/auth" render={(props) => <AuthLayout {...props} />} />
           <Redirect from="/" to="/admin/files" />

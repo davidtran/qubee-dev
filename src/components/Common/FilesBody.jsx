@@ -21,22 +21,8 @@ function FilesBody({
       responsive
       size="sm"
     >
-      <TableHeader
-        {...props}
-        isSelected={isSelected}
-        onSelectAll={onSelectAll}
-        handleSortFiles={handleSortFiles}
-        collection={collection}
-      />
-      <TableBody
-        {...props}
-        collection={collection}
-        getFiles={getFiles}
-        isSelected={isSelected}
-        onCheckboxClick={onCheckboxClick}
-        setFolderId={setFolderId}
-        setFileCount={setFileCount}
-      />
+      <TableHeader />
+      <TableBody />
     </Table>
   );
 }

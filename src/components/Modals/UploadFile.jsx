@@ -1,36 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { FilePond, registerPlugin } from "react-filepond";
 import { Button, Modal } from "reactstrap";
 import FilePondPluginFileMetadata from "filepond-plugin-file-metadata";
 import "react-toastify/dist/ReactToastify.css";
 import "filepond/dist/filepond.min.css";
-// import UploadFolderPicker from "../Common/UploadFolderPicker";
+import { FileContext } from "../../contexts/FileListContext";
 
 registerPlugin(FilePondPluginFileMetadata);
 
 const UploadFile = ({
   buttonLabel,
   buttonIcon,
-  modalClassName,
-  collection,
-  selectedData,
-  getFolderId,
-  getFiles,
+  modalClassName,  
 }) => {
+  const { uploadFile, uploadFileStatuses, refresh } = useContext(FileContext);
   const [modal, setModal] = useState(false);
-
-  // const [selectedFolderId, setSelectedFolderId] = useState();
-
-  const toggle = () => {
-    getFiles();
+  const toggle = () => {    
     setModal(!modal);
   };
 
-  const handleOnError = (error, file, status) => {
-    console.log(error, file, status);
-  };
-
-  // const selectFolderId = (id) => setSelectedFolderId(id);
+  function onChange({
+    target: {
+      validity,
+      files: [file],
+    },
+  }) {
+    if (validity.valid) {      
+      uploadFile(new Date().getTime(), file.name, file);      
+    }    
+  }
 
   return (
     <div className="file-upload-component">
@@ -65,22 +63,24 @@ const UploadFile = ({
           </button>
         </div>
         <div className="modal-body">
-          {/* <UploadFolderPicker
-            collection={collection}
-            selectedData={selectedData}
-            selectedFolderId={selectFolderId}
-          /> */}
-          <FilePond
-            allowMultiple={true}
-            name={"mediaFiles"}
-            onerror={(error, file, status) =>
-              handleOnError(error, file, status)
-            }
-            onprocessfiles={toggle}
-            maxFiles={12}
-            server={process.env.REACT_APP_API_URL + "/files"}
-            fileMetadataObject={{ parentDirectoryId: getFolderId }}
-          ></FilePond>
+          <input type="file" required onChange={onChange} />
+          <div class="upload-file-list">
+            {Object.values(uploadFileStatuses).map(fileStatus => (
+              <div class="upload-file-item" key={fileStatus.id}>
+                <div class="upload-file-name">{fileStatus.name}</div>                                
+                {fileStatus.pending && 
+                  <div class="upload-file-pending">Please wait</div>
+                }
+                {fileStatus.error && 
+                  <div class="upload-file-error">Error</div>
+                }
+                {fileStatus.success && 
+                  <div class="upload-file-success">Success</div>
+                }
+              </div>
+            ))}
+            
+          </div>
         </div>
       </Modal>
     </div>

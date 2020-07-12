@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Media, Button, Badge } from "reactstrap";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MetaTags from "../Modals/MetaTags";
 import fileSizeConversion from "../../utils/fileSizeConversion";
-import { sortFiles } from '../../utils/sortFiles';
+import { FileContext } from "../../contexts/FileListContext";
 
 function TableBody({
   collection,
@@ -15,48 +15,23 @@ function TableBody({
   setFileCount,
   ...props
 }) {
-  const [allFiles, setAllFiles] = useState([]);
+  const { files, selectedFileIds, toggleSelectFile } = useContext(FileContext);  
 
-  useEffect(() => {
-    const folderId = props.match.params.id
-      ? props.match.params.id
-      : collection.rootFolder._id;
-
-    let _allFiles = collection.dataCache.filter((file) => file.parentDirectoryId === folderId);
-    if (collection.sorting) {
-      sortFiles(_allFiles, collection.sorting.attribute, collection.sorting.direction)
-    }
-    setAllFiles(_allFiles);
-
-    setFileCount(allFiles.length);
-    setFolderId(folderId);
-  }, [
-    allFiles.length,
-    collection.sorting,
-    collection.dataCache,
-    collection.rootFolder._id,
-    props.match.params.id,
-    setFileCount,
-    setFolderId,
-  ]);
-
-  let tableBody;
-
-  if (allFiles.length) {
-    tableBody = (
+  if (files.length) {
+    return (
       <tbody>
-        {allFiles.map((file) => (
-          <tr key={file._id} className="file-list-item">
+        {files.map((file) => (
+          <tr key={file.id} className="file-list-item">
             <th scope="row">
               <Button
                 color="link"
                 size="sm"
                 type="button"
-                onClick={() => onCheckboxClick(file)}
+                onClick={() => toggleSelectFile(file.id)}
               >
                 <FontAwesomeIcon
                   icon={
-                    isSelected[file._id] ? "check-square" : ["far", "square"]
+                    selectedFileIds.indexOf(file.id) !== -1 ? "check-square" : ["far", "square"]
                   }
                   size="lg"
                 />
@@ -64,7 +39,7 @@ function TableBody({
             </th>
             <td>
               <Media className="align-items-center">
-                <Link to={`/admin/folder/${file._id}`}>
+                <Link to={`/admin/folder/${file.id}`}>
                   <FontAwesomeIcon
                     icon={file.kind === "FOLDER" ? "folder-open" : "file-image"}
                     className="mr-2"
@@ -87,8 +62,8 @@ function TableBody({
                   ))}
                   <MetaTags
                     buttonLabel="add +"
-                    fileId={file._id}
-                    getFiles={getFiles}
+                    fileId={file.id}
+                    getFiles={() => {}}
                   />
                 </div>
               )}
@@ -102,7 +77,7 @@ function TableBody({
       </tbody>
     );
   } else {
-    tableBody = (
+    return (
       <tbody>
         <tr className="file-list-item">
           <td colSpan="4" style={{ textAlign: "center" }}>
@@ -112,9 +87,7 @@ function TableBody({
         </tr>
       </tbody>
     );
-  }
-
-  return tableBody;
+  }  
 }
 
 export default TableBody;
