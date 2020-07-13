@@ -29,12 +29,12 @@ const client = new ApolloClient({
         );
       if (networkError) console.log(`[Network error]: ${networkError}`);
 
-      // if (graphQLErrors && graphQLErrors[0] && graphQLErrors[0].extensions.code === "UNAUTHENTICATED") {
-      //   //localStorage.removeItem('JWT_STORAGE_KEY');
-      //   if (window.location.pathname.startsWith('/auth') === false) {
-      //     window.location.href = '/auth/login';
-      //   }
-      // }
+      if (graphQLErrors && graphQLErrors[0] && graphQLErrors[0].extensions.code === "UNAUTHENTICATED") {
+        localStorage.removeItem('JWT_STORAGE_KEY');
+        if (window.location.pathname.startsWith('/auth') === false) {
+          window.location.href = '/auth/login';
+        }
+      }
     }),
     createUploadLink({
       uri: process.env.REACT_APP_GRAPHQL_URL,

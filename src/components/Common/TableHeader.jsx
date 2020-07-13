@@ -37,9 +37,9 @@ function TableHeader() {
         <th
           className="sortable"
           scope="col"
-          onClick={() => toggleSortDirection('createdDate')}
+          onClick={() => toggleSortDirection('created_at')}
         >
-          Date Added &nbsp;{renderSortDirection('createdDate')}
+          Date Added &nbsp;{renderSortDirection('created_at')}
         </th>
         <th
           className="sortable"

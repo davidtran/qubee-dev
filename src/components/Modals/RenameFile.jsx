@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { saveFolder } from "../../services/folderService";
 import { saveFile } from "../../services/fileService";
 import {
@@ -10,22 +10,20 @@ import {
   InputGroupAddon,
   InputGroupText,
 } from "reactstrap";
+import { FileContext } from "../../contexts/FileListContext";
 
 const RenameFile = ({
   buttonLabel,
   buttonIcon,
   disable,
-  modalClassName,
-  selectedData,
-  getFiles,
+  modalClassName,  
 }) => {
-  const selectedDataObj = Object.values(selectedData)[0];
+  const { files, selectedFileIds} = useContext(FileContext);
+  const selectedDataObj = selectedFileIds[0];
   const [modal, setModal] = useState(false);
-  const [inputField, setInputField] = useState(selectedDataObj.name);
+  const [inputField, setInputField] = useState(selectedDataObj && selectedDataObj.name);
 
-  const toggle = () => {
-    // Update parent component view
-    getFiles();
+  const toggle = () => {    
     setModal(!modal);
   };
 
@@ -55,7 +53,7 @@ const RenameFile = ({
     }
   };
 
-  console.log(Object.values(selectedData)[0]._id);
+  if (!selectedDataObj) return null;
 
   return (
     <div className="file-upload-component">

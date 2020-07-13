@@ -47,16 +47,20 @@ export const FileContextProvider = ({ children }) => {
     if (fileListData) {      
       const fileData = [
         ...fileListData.getFiles.files.map(file => ({
+          ...file,
           name: file.file_name,
           kind: 'FILE',
         })),
         ...fileListData.getFiles.folders.map(folder => ({
+          ...folder,
           name: folder.name,
           kind: 'FOLDER',
         }))
+
       ]      
       sortFiles(fileData, sorting.attribute, sorting.direction);      
       setFiles(fileData);
+      
     }
   }, [fileListData]);
 
@@ -101,7 +105,7 @@ export const FileContextProvider = ({ children }) => {
     if (files.length === selectedFileIds.length) {
       setSelectedFileIds([]);
     } else {
-      const ids = setFiles(files.map(file => file.id));
+      const ids = files.map(file => file.id);
       setSelectedFileIds(ids);
     }    
   }
@@ -113,6 +117,7 @@ export const FileContextProvider = ({ children }) => {
     } else {
       setSelectedFileIds([...selectedFileIds, fileId]);
     }
+    console.log(fileId);
   }
 
   function toggleSortDirection(attribute) {    
@@ -127,10 +132,11 @@ export const FileContextProvider = ({ children }) => {
       direction: nextDirection,
     }
     setSorting(_sorting);
+    sortFiles(files, _sorting.attribute, _sorting.direction);
   }
-
-  const isSeletedAll = files.length > 0 && !files.some(file => !file._selected);
   
+  const isSeletedAll = files.length > 0 && selectedFileIds.length > 0 && files.length === selectedFileIds.length;
+
   const value = {
     fetchFiles,
     toggleSelectFile,
@@ -151,3 +157,4 @@ export const FileContextProvider = ({ children }) => {
     <FileContext.Provider value={value}>{children}</FileContext.Provider>
   )
 }
+

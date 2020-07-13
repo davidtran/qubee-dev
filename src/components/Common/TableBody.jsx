@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MetaTags from "../Modals/MetaTags";
 import fileSizeConversion from "../../utils/fileSizeConversion";
 import { FileContext } from "../../contexts/FileListContext";
+import moment from 'moment';
 
 function TableBody({
   collection,
@@ -68,7 +69,7 @@ function TableBody({
                 </div>
               )}
             </td>
-            <td>{file.createdDate}</td>
+            <td>{moment(file.created_at).format('YYYY-MM-DD HH:mm:ss')}</td>
             <td>
               {file.kind === "FILE" && fileSizeConversion(file.size, false)}
             </td>

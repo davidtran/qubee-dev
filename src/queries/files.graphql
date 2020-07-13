@@ -1,13 +1,18 @@
 query GetFiles($folderId: String, $keyword: String) {
   getFiles(folderId: $folderId, keyword: $keyword) {
     path,
-    files{
+    files {
+      id,
       file_name,
-      type
+      type,      
+      size, 
+      created_at
     },
-    folders{
-      name,
-      path
+    folders {
+      id,
+      name,      
+      path,
+      created_at    
     }
   }
 }
