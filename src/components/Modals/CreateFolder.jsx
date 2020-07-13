@@ -8,7 +8,7 @@ const CreateFolder = ({
   buttonIcon,
   modalClassName,  
 }) => {
-  const { refresh, createFolder, createFolderError, isCreatingFolder } = useContext(FileContext);
+  const { createFolder, createFolderError, isCreatingFolder } = useContext(FileContext);
 
   let buttonIconClasses = "ni ni-";
   if (buttonIcon) buttonIconClasses += buttonIcon;

@@ -23,7 +23,7 @@ function _sortByString(name1, name2, direction) {
 function _sortByDate(date1, date2, direction) {
   const d1 = new Date(date1);
   const d2 = new Date(date2);
-  console.log(date1, date2);
+  
   if (d1 > d2) {
     return direction === 'ASC' ? 1 : -1;
   } else if (d1 < d2) {

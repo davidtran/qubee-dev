@@ -103,11 +103,11 @@ export const FileContextProvider = ({ children }) => {
           folderName,
           folderId,
         }
-      });       
+      });      
+      refresh(); 
       return true;
     } catch (e) {
-      console.log(JSON.stringify(e, null, 2));
-      console.log(e);
+      console.log(JSON.stringify(e, null, 2));      
     }
   } 
   

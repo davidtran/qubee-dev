@@ -70,11 +70,9 @@ const Admin = (props) => {
         />
         <Switch>
           <Route
-            path="/admin/files/:id"
+            path="/admin/folder/:folderId"
             component={Files}
-          />
-          {/* <Route path="/admin/search/:term" component={SearchResults} />
-          <Route path="/admin/search" component={SearchResults} /> */}
+          />                    
           <Route
             path="/admin/files"
             component={Files}
