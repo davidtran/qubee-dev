@@ -26,15 +26,15 @@ export function deleteFile(fileId) {
   return http.delete(fileUrl(fileId));
 }
 
-export function downloadFiles(selectedData) {
-  const items = Object.values(selectedData);
-  const fileIds = items.filter(item => item.kind === 'FILE').map(item => item._id);
-  const filename = items.length > 1 ? 'QubeeFiles.zip' : items[0].name
+export function downloadFiles({ folderId, fileIds, name }) {  
+  const filename = fileIds.length > 1 ? 'QubeeFiles.zip' : name
+  const token = localStorage.getItem('JWT_STORAGE_KEY');  
   return http
     .post(process.env.REACT_APP_API_URL + '/download', {
       files: fileIds,
+      folderId
     }, {
-      responseType: 'blob'
+      responseType: 'blob',      
     })
     .then(res => download(res.data, filename))
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useMutation, useLazyQuery } from "@apollo/react-hooks";
 import { loader } from "graphql.macro";
 import { sortFiles } from '../utils/sortFiles';
+import { downloadFiles } from '../services/fileService';
 
 const filesQuery = loader('../queries/files.graphql');
 const createFolderQuery = loader('../queries/createFolder.graphql');
@@ -15,6 +16,7 @@ export const FileContext = React.createContext({
   uploadFile: () => {},
   refresh: () => {},
   createFolder: () => {},
+  downloadSelectedFiles: () => {},
   uploadFileStatuses: null,
   files: [],
   isRequestFileList: false,
@@ -87,7 +89,8 @@ export const FileContextProvider = ({ children }) => {
     setFileStatus({fileId, fileName, file, isUploading: true, error: false, success: false })    
     try {      
       await uploadFileMutation({ variables: {
-        file
+        file,
+        folderId: folderId,
       }});
       refresh();
       setFileStatus({fileId, isUploading: false, error: false, success: true });    
@@ -113,6 +116,7 @@ export const FileContextProvider = ({ children }) => {
   
   async function fetchFiles({ folderId, keyword }) {
     setFetchFilesParams({ folderId, keyword });
+    setFolderId(folderId);
     setSelectedFileIds([]);
     await fetchFileQuery({ variables: {
       folderId,
@@ -153,6 +157,13 @@ export const FileContextProvider = ({ children }) => {
     setSorting(_sorting);
     sortFiles(files, _sorting.attribute, _sorting.direction);
   }
+
+  function downloadSelectedFiles() {
+    if (selectedFileIds.length === 0) return;
+    const selectedFiles = selectedFileIds.map(id => files.find(file => file.kind === 'FILE' && file.id === id));    
+    const fileIds = selectedFiles.map(item => item.id);
+    downloadFiles({ folderId, fileIds, selectedFiles, name: selectedFiles[0].name });
+  }
   
   const isSeletedAll = files.length > 0 && selectedFileIds.length > 0 && files.length === selectedFileIds.length;
 
@@ -164,6 +175,7 @@ export const FileContextProvider = ({ children }) => {
     uploadFile,
     refresh,
     createFolder,
+    downloadSelectedFiles,
     uploadFileStatuses,
     files,    
     isRequestFileList,

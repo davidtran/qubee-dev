@@ -2,6 +2,14 @@ import axios from "axios";
 import logger from "./logService";
 //import { toast } from "react-toastify";
 
+axios.interceptors.request.use(function (config) {
+  const token = localStorage.getItem('JWT_STORAGE_KEY');  
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 axios.interceptors.response.use(null, (error) => {
   const expectedError =
     error.response &&
