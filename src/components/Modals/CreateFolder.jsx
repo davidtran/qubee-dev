@@ -1,23 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { saveFolder } from "../../services/folderService";
 import { Button, Modal, Form, Input } from "reactstrap";
+import { FileContext } from "../../contexts/FileListContext";
 
 const CreateFolder = ({
   buttonLabel,
   buttonIcon,
-  modalClassName,
-  getFiles,
-  getFolderId,
+  modalClassName,  
 }) => {
+  const { refresh, createFolder, createFolderError, isCreatingFolder } = useContext(FileContext);
+
   let buttonIconClasses = "ni ni-";
   if (buttonIcon) buttonIconClasses += buttonIcon;
 
   const [modal, setModal] = useState(false);
   const [inputField, setInputField] = useState("");
 
-  const toggle = () => {
-    // Update parent component view
-    getFiles();
+  const toggle = () => {    
     setModal(!modal);
   };
 
@@ -25,18 +24,9 @@ const CreateFolder = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // TODO: Update the parents property with the correct IDs
-    const folderName = {
-      name: inputField,
-      parentDirectoryId: getFolderId,
-    };
-
-    await saveFolder(folderName)
-      .then((response) => {
-        toggle();
-      })
-      .catch((ex) => console.log(ex));
+    createFolder({ folderName: inputField });
+    setModal(false);
+    setInputField('');
   };
 
   return (
@@ -72,6 +62,11 @@ const CreateFolder = ({
               value={inputField}
               onChange={handleOnChange}
             />
+            {createFolderError && 
+              <div className="alert alert-danger">
+                {createFolderError.message}
+              </div>
+            }            
           </div>
           <div className="modal-footer">
             <div className="text-center">
@@ -79,7 +74,7 @@ const CreateFolder = ({
                 Cancel
               </Button>
               <Button color="primary" disabled={!inputField} type="submit">
-                Create
+                { isCreatingFolder ? 'Please wait...' : 'Create '}
               </Button>
             </div>
           </div>

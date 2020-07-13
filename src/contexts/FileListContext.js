@@ -14,6 +14,7 @@ export const FileContext = React.createContext({
   toggleSortDirection: () => {},
   uploadFile: () => {},
   refresh: () => {},
+  createFolder: () => {},
   uploadFileStatuses: null,
   files: [],
   isRequestFileList: false,
@@ -24,6 +25,8 @@ export const FileContext = React.createContext({
     attribute: 'name',
     direction: 'ASC',
   },  
+  isCreatingFolder: false,
+  createFolderError: null,
 });
 
 export const FileContextProvider = ({ children }) => {
@@ -41,7 +44,8 @@ export const FileContextProvider = ({ children }) => {
   }] = useLazyQuery(filesQuery);
   const [uploadFileStatuses, setUploadFileStatuses] = useState({});
   const [uploadFileMutation] = useMutation(uploadFileQuery); 
-  const [createFolderMutation, { loading: isCreatingFolder, error, createFolderError }] = useMutation(createFolderQuery);
+  const [createFolderMutation, { loading: isCreatingFolder, error: createFolderError }] = useMutation(createFolderQuery);
+  const [folderId, setFolderId] = useState(null);
 
   useEffect(() => {
     if (fileListData) {      
@@ -75,8 +79,8 @@ export const FileContextProvider = ({ children }) => {
     });
   }
 
-  async function refresh() {
-    await fetchFiles({ ...fetchFilesParams });
+  async function refresh() {        
+    await fetchFiles(fetchFilesParams);
   }
 
   async function uploadFile(fileId, fileName, file) {    
@@ -85,12 +89,27 @@ export const FileContextProvider = ({ children }) => {
       await uploadFileMutation({ variables: {
         file
       }});
-      await refresh();
+      refresh();
       setFileStatus({fileId, isUploading: false, error: false, success: true });    
     } catch (e) {
       setFileStatus({fileId, isUploading: false, error: true, success: false });
     }
   }
+
+  async function createFolder({ folderName }) {
+    try {
+      await createFolderMutation({
+        variables: {
+          folderName,
+          folderId,
+        }
+      });       
+      return true;
+    } catch (e) {
+      console.log(JSON.stringify(e, null, 2));
+      console.log(e);
+    }
+  } 
   
   async function fetchFiles({ folderId, keyword }) {
     setFetchFilesParams({ folderId, keyword });
@@ -144,6 +163,7 @@ export const FileContextProvider = ({ children }) => {
     toggleSortDirection, 
     uploadFile,
     refresh,
+    createFolder,
     uploadFileStatuses,
     files,    
     isRequestFileList,
@@ -151,6 +171,8 @@ export const FileContextProvider = ({ children }) => {
     selectedFileIds,
     sorting,      
     isSeletedAll,
+    isCreatingFolder,
+    createFolderError,
   }
   
   return (

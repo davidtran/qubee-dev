@@ -1,5 +1,8 @@
-mutation Login($email: String!, $password: String!) {
-  login(email: $email, password: $password) {
-    token
+mutation CreateFolder($folderName: String!, $folderId: String) {
+  createNewFolder(name: $folderName, folderId: $folderId) {
+    id,
+    name,
+    path,
+    created_at,
   }
 }
