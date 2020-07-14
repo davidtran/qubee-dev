@@ -61,6 +61,7 @@ export const FileOperationsContextProvider = ({ children }) => {
     }
   }
 
+
   async function deleteFileAndFolder() {
     const files = getSelectedFiles();
     const deleteFileIds = files
@@ -70,10 +71,13 @@ export const FileOperationsContextProvider = ({ children }) => {
       .filter((file) => file.kind === "FOLDER")
       .map((file) => file.id);
     
-    const pms = [
-      deleteFilesMutation({ variables: { files: deleteFileIds } }),
-      deleteFoldersMutation({ variables: { folders: deleteFolderIds }})
-    ];
+    const pms = [];
+    if (deleteFileIds.length > 0) {
+      pms.push(deleteFilesMutation({ variables: { files: deleteFileIds } }));      
+    }
+    if (deleteFolderIds.length > 0) {
+      pms.push(deleteFoldersMutation({ variables: { folderId: deleteFolderIds[0] }}))
+    }
 
     setIsDeletePending(true);
     setIsDeleteError(null);
