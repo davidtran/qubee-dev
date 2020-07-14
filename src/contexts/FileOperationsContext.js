@@ -76,7 +76,7 @@ export const FileOperationsContextProvider = ({ children }) => {
       pms.push(deleteFilesMutation({ variables: { files: deleteFileIds } }));      
     }
     if (deleteFolderIds.length > 0) {
-      pms.push(deleteFoldersMutation({ variables: { folderId: deleteFolderIds[0] }}))
+      pms.push(deleteFoldersMutation({ variables: { folderIds: deleteFolderIds }}))
     }
 
     setIsDeletePending(true);

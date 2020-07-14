@@ -13,6 +13,7 @@ export const AuthenticationContext = React.createContext({
   checkLogin: () => {},
   login: () => {},
   register: () => {},
+  logout: () => {},
   user: null,
   isRequestLogin: null,
   isLoginError: null,
@@ -35,8 +36,7 @@ export const AuthenticationContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem(JWT_STORAGE_KEY);
-    console.log(token, 11);
+    const token = localStorage.getItem(JWT_STORAGE_KEY);    
     if (token) {
       getUserQuery();
     }
@@ -62,6 +62,7 @@ export const AuthenticationContextProvider = ({ children }) => {
         },
       });
       localStorage.setItem(JWT_STORAGE_KEY, result.data.login.token);
+      getUserQuery();
       history.push("/");
     } catch (e) {}
   }

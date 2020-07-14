@@ -24,7 +24,7 @@ import {
 import { AuthenticationContext } from "../../contexts/AuthenticationContext";
 
 const AdminNavbar = ({ brandText }) => {
-  const { user } = useContext(AuthenticationContext);
+  const { user, logout } = useContext(AuthenticationContext);
   const inputEl = useRef(null);
   const history = useHistory();
 
@@ -108,7 +108,7 @@ const AdminNavbar = ({ brandText }) => {
                   <span>Support</span>
                 </DropdownItem>
                 <DropdownItem divider />
-                <DropdownItem href="#pablo" onClick={(e) => e.preventDefault()}>
+                <DropdownItem href="#pablo" onClick={logout}>
                   <i className="ni ni-user-run" />
                   <span>Logout</span>
                 </DropdownItem>
