@@ -52,6 +52,7 @@ import { AuthenticationContextProvider } from "./contexts/AuthenticationContext"
 import { ApolloProvider } from "@apollo/react-hooks";
 import apolloClient from "./libs/apollo";
 import { FileContextProvider } from "./contexts/FileListContext";
+import { FileOperationsContextProvider } from "./contexts/FileOperationsContext";
 
 library.add(
   faFacebookF,
@@ -82,7 +83,9 @@ ReactDOM.render(
             path="/admin"
             render={(props) => (
               <FileContextProvider>
-                <AdminLayout {...props} />
+                <FileOperationsContextProvider>
+                  <AdminLayout {...props} />
+                </FileOperationsContextProvider>
               </FileContextProvider>
             )}
           />

@@ -1,0 +1,5 @@
+mutation RenameFile($fileId: String!, $fileName: String!) {
+  renameFile(fileId: $fileId, fileName: $fileName) {
+    id
+  }
+}

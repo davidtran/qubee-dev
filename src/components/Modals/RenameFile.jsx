@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { saveFolder } from "../../services/folderService";
 import { saveFile } from "../../services/fileService";
 import {
@@ -11,46 +11,36 @@ import {
   InputGroupText,
 } from "reactstrap";
 import { FileContext } from "../../contexts/FileListContext";
+import { FileOperationsContext } from "../../contexts/FileOperationsContext";
 
-const RenameFile = ({
-  buttonLabel,
-  buttonIcon,
-  disable,
-  modalClassName,  
-}) => {
-  const { files, selectedFileIds} = useContext(FileContext);
-  const selectedDataObj = selectedFileIds[0];
+const RenameFile = ({ buttonLabel, buttonIcon, disable, modalClassName }) => {
+  const { getSelectedFiles } = useContext(FileContext);
+  const { renameFileAndFolder, isRenamePending, isRenameError } = useContext(
+    FileOperationsContext
+  );
+  const selectedDataObj = getSelectedFiles();
   const [modal, setModal] = useState(false);
-  const [inputField, setInputField] = useState(selectedDataObj && selectedDataObj.name);
-
-  const toggle = () => {    
-    setModal(!modal);
-  };
-
+  const [inputField, setInputField] = useState(
+    selectedDataObj.length > 0 && selectedDataObj[0].name
+  );
+  useEffect(() => {
+    if (!modal) {
+      setInputField('');
+    } else {
+      let name = '';
+      if (selectedDataObj.length > 0) {
+        name = selectedDataObj[0].kind === 'FILE' ? selectedDataObj[0].name.split('.')[0] : selectedDataObj[0].name;  
+      }            
+      setInputField(name)
+    }
+  }, [modal]);
+  const toggle = () => setModal(!modal);
   const handleOnChange = (e) => setInputField(e.target.value);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const updatedName = {
-      name: inputField,
-      slug: inputField.replace(/\s+/g, "-").toLowerCase(),
-      _id: selectedDataObj._id,
-    };
-
-    if (selectedDataObj.kind === "FOLDER") {
-      await saveFolder(updatedName)
-        .then(() => {
-          toggle();
-        })
-        .catch((ex) => console.log(ex));
-    } else {
-      await saveFile(updatedName)
-        .then(() => {
-          toggle();
-        })
-        .catch((ex) => console.log(ex));
-    }
+    if (!inputField) return;
+    renameFileAndFolder(inputField);
+    setModal(false);
   };
 
   if (!selectedDataObj) return null;
@@ -92,14 +82,19 @@ const RenameFile = ({
                 </InputGroupText>
               </InputGroupAddon>
             </InputGroup>
+            {isRenameError && (
+              <div className="alert alert-danger">
+                {isRenameError.message}
+              </div>
+            )}            
           </div>
           <div className="modal-footer">
             <div className="text-center">
               <Button data-dismiss="modal" color="link" onClick={toggle}>
                 Cancel
               </Button>
-              <Button color="primary" disabled={!inputField} type="submit">
-                Create
+              <Button color="primary" disabled={!inputField || isRenamePending} type="submit">
+                {isRenamePending ? "Please wait" : "Rename"}
               </Button>
             </div>
           </div>

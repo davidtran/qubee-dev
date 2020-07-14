@@ -53,7 +53,7 @@ const Login = () => {
                     </InputGroupText>
                   </InputGroupAddon>
                   <input
-                    class="form-control"
+                    className="form-control"
                     placeholder="Email"
                     name="email"
                     type="email"
@@ -74,7 +74,7 @@ const Login = () => {
                     </InputGroupText>
                   </InputGroupAddon>
                   <input
-                    class="form-control"
+                    className="form-control"
                     placeholder="Password"
                     name="password"
                     type="password"

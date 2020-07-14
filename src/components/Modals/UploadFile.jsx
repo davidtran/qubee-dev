@@ -64,18 +64,18 @@ const UploadFile = ({
         </div>
         <div className="modal-body">
           <input type="file" required onChange={onChange} />
-          <div class="upload-file-list">
+          <div className="upload-file-list">
             {Object.values(uploadFileStatuses).map(fileStatus => (
-              <div class="upload-file-item" key={fileStatus.id}>
-                <div class="upload-file-name">{fileStatus.name}</div>                                
+              <div className="upload-file-item" key={fileStatus.id}>
+                <div className="upload-file-name">{fileStatus.name}</div>                                
                 {fileStatus.pending && 
-                  <div class="upload-file-pending">Please wait</div>
+                  <div className="upload-file-pending">Please wait</div>
                 }
                 {fileStatus.error && 
-                  <div class="upload-file-error">Error</div>
+                  <div className="upload-file-error">Error</div>
                 }
                 {fileStatus.success && 
-                  <div class="upload-file-success">Success</div>
+                  <div className="upload-file-success">Success</div>
                 }
               </div>
             ))}

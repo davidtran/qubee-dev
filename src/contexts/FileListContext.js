@@ -17,6 +17,8 @@ export const FileContext = React.createContext({
   refresh: () => {},
   createFolder: () => {},
   downloadSelectedFiles: () => {},
+  getSelectedFiles: () => {},
+  deselectFiles: () => {},
   uploadFileStatuses: null,
   files: [],
   isRequestFileList: false,
@@ -139,8 +141,7 @@ export const FileContextProvider = ({ children }) => {
       setSelectedFileIds(selectedFileIds.filter(id => id !== fileId))
     } else {
       setSelectedFileIds([...selectedFileIds, fileId]);
-    }
-    console.log(fileId);
+    }    
   }
 
   function toggleSortDirection(attribute) {    
@@ -164,6 +165,15 @@ export const FileContextProvider = ({ children }) => {
     const fileIds = selectedFiles.map(item => item.id);
     downloadFiles({ folderId, fileIds, selectedFiles, name: selectedFiles[0].name });
   }
+
+  function getSelectedFiles() {
+    const selectedFiles = selectedFileIds.map(id => files.find(file => file.id === id));    
+    return selectedFiles;
+  }
+
+  function deselectFiles() {
+    setSelectedFileIds([]);
+  }
   
   const isSeletedAll = files.length > 0 && selectedFileIds.length > 0 && files.length === selectedFileIds.length;
 
@@ -176,6 +186,8 @@ export const FileContextProvider = ({ children }) => {
     refresh,
     createFolder,
     downloadSelectedFiles,
+    getSelectedFiles,
+    deselectFiles,
     uploadFileStatuses,
     files,    
     isRequestFileList,
