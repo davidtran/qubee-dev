@@ -1,8 +1,9 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from 'react';
 import { useMutation, useLazyQuery } from "@apollo/react-hooks";
 import { loader } from "graphql.macro";
 import { FileContext } from "./FileListContext";
 
+const filesQuery = loader('../queries/files.graphql');
 const renameFileQuery = loader("../queries/renameFile.graphql");
 const deleteFilesQuery = loader("../queries/deleteFiles.graphql");
 const renameFolderQuery = loader("../queries/renameFolder.graphql");
@@ -10,11 +11,15 @@ const deleteFoldersQuery = loader("../queries/deleteFolders.graphql");
 
 export const FileOperationsContext = React.createContext({
   renameFileAndFolder: () => {},  
-  deleteFileAndFolder: () => {},
+  deleteFileAndFolder: () => {},  
   isRenamePending: false,
   isRenameError: null,
   isDeletePending: false,
-  isDeleteError: null,
+  isDeleteError: null,  
+  folders: [],
+  selectedFolderId: null,
+  selectFolder: () => {},
+  fetchFolders: () => {},  
 });
 
 export const FileOperationsContextProvider = ({ children }) => {
@@ -28,6 +33,25 @@ export const FileOperationsContextProvider = ({ children }) => {
   const [isRenameError, setIsRenameError] = useState(null);
   const [isDeletePending, setIsDeletePending] = useState(false);
   const [isDeleteError, setIsDeleteError] = useState(null);
+
+  const [folders, setFolders] = useState([]);
+  const [selectedFolderId, setSelectedFolderId] = useState(null);
+  const [fetchFolderQuery, { data: folderData }] = useLazyQuery(filesQuery);
+
+  useEffect(() => {
+    if (folderData) {
+      setFolders(folderData.getFiles.folders);
+    }    
+  }, [folderData]);
+  
+  function selectFolder(folderId) {
+    fetchFolderQuery({ variables: { folderId } });
+  }
+
+  function fetchFolders() {
+    fetchFolderQuery({ variables: { folderId: null } });
+  }
+
 
   async function renameFileAndFolder(name) {
     const files = getSelectedFiles();
@@ -101,6 +125,11 @@ export const FileOperationsContextProvider = ({ children }) => {
     isRenameError,
     isDeletePending,
     isDeleteError,
+    selectFolder,
+    folders,
+    selectedFolderId,
+    setSelectedFolderId,
+    fetchFolders,
   };
 
 

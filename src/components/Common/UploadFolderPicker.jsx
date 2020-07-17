@@ -1,34 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { ListGroup, ListGroupItem, Button } from "reactstrap";
 
-function UploadFolderPicker({ collection, selectedData, selectedFolderId }) {
-  const [folderId, setFolderId] = useState(
-    collection.dataCache.find((d) => d.slug === "all")._id
-  );
-  const [folderModels, setFolderModels] = useState([]);
-
-  const handleOnCLick = (id) => {
-    selectedFolderId(id);
-    setFolderId(id);
-  };
-
-  useEffect(() => {
-    setFolderModels(
-      collection.models.filter(
-        (m) => m.kind === "FOLDER" && m.parentDirectoryId === folderId
-      )
-    );
-  }, [collection.dataCache, collection.models, folderId]);
-
+function UploadFolderPicker({ selectedFolderId, folders, selectFolder }) {  
+ 
   return (
     <>
       <ul className="breadcrumb folder-path list-unstyled">
         <li className="list-inline-item">
           <Button
             onClick={() =>
-              handleOnCLick(
-                collection.dataCache.find((d) => d.slug === "all")._id
-              )
+              selectFolder(null)
             }
             color="link"
             size="sm"
@@ -40,12 +21,12 @@ function UploadFolderPicker({ collection, selectedData, selectedFolderId }) {
       </ul>
       <div className="page">
         <ListGroup flush>
-          {folderModels.map((folder) => (
+          {folders.map((folder) => (
             <ListGroupItem
-              key={folder._id}
+              key={folder.id}
               tag="button"
               action
-              onClick={() => handleOnCLick(folder._id)}
+              onClick={() => selectFolder(folder.id)}
             >
               <i className="fas fa-folder-open mr-2" />
               <span className="mb-0 text-sm">{folder.name}</span>

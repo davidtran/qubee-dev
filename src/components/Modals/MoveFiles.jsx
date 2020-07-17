@@ -1,60 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Button, Modal } from "reactstrap";
 // import { saveFolder } from "../../services/folderService";
 import { saveFile } from "../../services/fileService";
 import UploadFolderPicker from "../Common/UploadFolderPicker";
 import "react-toastify/dist/ReactToastify.css";
+import { FileOperationsContext } from "../../contexts/FileOperationsContext";
 
 const MoveFiles = ({
   buttonLabel,
   buttonIcon,
-  modalClassName,
-  collection,
-  selectedData,
-  getFiles,
+  modalClassName,  
 }) => {
   const [modal, setModal] = useState(false);
-  const [selectedFolderId, setSelectedFolderId] = useState();
+  const { folders, selectedFolderId, selectFolder, fetchFolders } = useContext(FileOperationsContext);
 
-  const toggle = () => {
-    getFiles();
+  const toggle = () => {    
+    fetchFolders();
     setModal(!modal);
   };
 
-  const handleProcessedFiles = () => {
-    const fileIds = Object.keys(selectedData);
-    // const models = collection.models;
-
-    // Loop through all selected file IDs
-    fileIds.map(async (id) => {
-      // Find the model in the collection that match the selected file ID
-      // const model = models.find((m) => m._id === id);
-      const file = {
-        _id: id,
-        parentDirectoryId: selectedFolderId,
-      };
-      // const modelChildren = models.filter(
-      //   (data) => data.parentDirectoryId === id
-      // );
-
-      await saveFile(file).then(() => toggle());
-
-      // TODO: Rework this code block to delete files inside folders if they exist
-      // if (model.kind === "FOLDER") {
-      // if (modelChildren.length) {
-      //   await deleteFile(id).then(() => toggle());
-      // } else {
-
-      // await saveFolder(id).then(() => toggle());
-      //}
-      // } else {
-
-      // }
-    });
+  const handleProcessedFiles = () => { 
   };
-
-  const selectFolderId = (id) => setSelectedFolderId(id);
-
+  
   return (
     <>
       <Button block color="link" type="button" onClick={toggle}>
@@ -77,18 +44,17 @@ const MoveFiles = ({
           </button>
         </div>
         <div className="modal-body">
-          <UploadFolderPicker
-            collection={collection}
-            selectedData={selectedData}
-            selectedFolderId={selectFolderId}
+          <UploadFolderPicker            
+            selectedFolderId={selectedFolderId}
+            folders={folders}
+            selectFolder={selectFolder}
           />
         </div>
         <div className="modal-footer">
           <div className="text-center">
             <Button data-dismiss="modal" color="link" onClick={toggle}>
               Cancel
-            </Button>
-            {/* TODO: Display the folder name on the button. */}
+            </Button>            
             <Button
               color="primary"
               type="button"
