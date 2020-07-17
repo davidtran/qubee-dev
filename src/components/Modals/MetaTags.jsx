@@ -1,28 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import { getFile, saveFile } from "../../services/fileService";
 import { toast } from "react-toastify";
 import { Button, Modal, Form, Input, Badge, Label } from "reactstrap";
+import { FileContext } from "../../contexts/FileListContext";
 
 const MetaTag = (props) => {
+  const { files, updateTags } = useContext(FileContext);
   const { buttonLabel, modalClassName, fileId, getFiles } = props;
-  const [modal, setModal] = useState(false);
-  //const [originalValue, setOriginalValue] = useState("");
+  const [modal, setModal] = useState(false);  
   const [inputField, setInputField] = useState(null);
-  const [fileName, setFileName] = useState({});
 
-  useEffect(() => {
-    async function getFileById() {
-      const { data } = await getFile(fileId);
-      setFileName(data.name);
-
-      // Break the array of tags into a list
-      const metaTags = data.metaTags.join("\n");
-      //setOriginalValue(metaTags);
-      setInputField(metaTags);
-    }
-    getFileById();
-  }, [fileId]);
-
+  const file = files.find(item => item.id === fileId);
   const toggle = () => setModal(!modal);
 
   const handleOnChange = (e) => {
@@ -31,27 +19,14 @@ const MetaTag = (props) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    console.log(props);
-
     const tagArray = inputField.replace(/[^0-9a-zA-Z-_ \n]/g, "").split(/\s+/);
 
     // If duplicate meta tags, prevent saving.
     if (checkDuplicate(tagArray))
       return toast.error("There are duplicate tags.");
 
-    const file = {
-      _id: fileId,
-      metaTags: inputField ? tagArray : [],
-    };
-
-    await saveFile(file)
-      .then((response) => {
-        getFiles(); // Update parent component view
-        toggle(e);
-        //console.log(response.data);
-      })
-      .catch((error) => console.error("Something went wrong: ", error));
+    await updateTags(fileId, tagArray);
+    toggle();
   };
 
   // Check for duplicate meta tags
@@ -78,7 +53,7 @@ const MetaTag = (props) => {
       <Modal className={modalClassName} isOpen={modal} toggle={toggle}>
         <div className="modal-header">
           <h5 className="modal-title" id="modal-title-default">
-            Edit tags for {fileName}
+            Edit tags for {file.name}
           </h5>
           <button
             aria-label="Close"
@@ -101,7 +76,7 @@ const MetaTag = (props) => {
               placeholder="Add one tag per line."
               rows="5"
               type="textarea"
-              value={inputField}
+              value={inputField || ''}
               onChange={handleOnChange}
             />
           </div>

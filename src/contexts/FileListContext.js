@@ -4,9 +4,11 @@ import { loader } from "graphql.macro";
 import { sortFiles } from '../utils/sortFiles';
 import { downloadFiles } from '../services/fileService';
 
+const updateTagsQuery = loader('../queries/updateTags.graphql');
 const filesQuery = loader('../queries/files.graphql');
 const createFolderQuery = loader('../queries/createFolder.graphql');
 const uploadFileQuery = loader('../queries/uploadFile.graphql');
+
 
 export const FileContext = React.createContext({
   fetchFiles: () => {},
@@ -31,6 +33,7 @@ export const FileContext = React.createContext({
   },  
   isCreatingFolder: false,
   createFolderError: null,
+  updateTags: (fileId, tags) => {},
 });
 
 export const FileContextProvider = ({ children }) => {
@@ -49,6 +52,7 @@ export const FileContextProvider = ({ children }) => {
   const [uploadFileStatuses, setUploadFileStatuses] = useState({});
   const [uploadFileMutation] = useMutation(uploadFileQuery); 
   const [createFolderMutation, { loading: isCreatingFolder, error: createFolderError }] = useMutation(createFolderQuery);
+  const [updateTagsMutation] = useMutation(updateTagsQuery);
   const [folderId, setFolderId] = useState(null);
 
   useEffect(() => {
@@ -81,6 +85,21 @@ export const FileContextProvider = ({ children }) => {
         success
       }
     });
+  }
+
+  async function updateTags(fileId, tags) {
+    try {
+      await updateTagsMutation({ variables: { fileId, tags } });
+      setFiles(files.map(file => {
+        if (file.id === fileId) {
+          file.tags = tags;
+        }
+        return file;
+      }));
+
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async function refresh() {        
@@ -197,6 +216,7 @@ export const FileContextProvider = ({ children }) => {
     isSeletedAll,
     isCreatingFolder,
     createFolderError,
+    updateTags,
   }
   
   return (

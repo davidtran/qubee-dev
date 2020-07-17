@@ -1,0 +1,6 @@
+mutation UpdateTags($fileId: String!, $tags: [String!]!) {
+  changeFileTags(fileId: $fileId, tags: $tags) {
+    id
+    file_name
+  }
+}

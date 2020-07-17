@@ -2,10 +2,10 @@ import React from "react";
 import MetaTags from "../Modals/MetaTags";
 import { Badge } from "reactstrap";
 
-function Tags({ getFiles, file }) {
+function Tags({ file }) {
   return (
     <div className="tags-container">
-      {file.metaTags.map((tag, i) => (
+      {file.tags.map((tag, i) => (
         <Badge
           key={tag + i}
           className="mr-2"
@@ -16,7 +16,7 @@ function Tags({ getFiles, file }) {
           {tag}
         </Badge>
       ))}
-      <MetaTags buttonLabel="add +" fileId={file._id} getFiles={getFiles} />
+      <MetaTags buttonLabel="add +" fileId={file.id} />
     </div>
   );
 }

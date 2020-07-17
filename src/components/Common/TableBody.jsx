@@ -49,9 +49,9 @@ function TableBody({
                   <span className="mb-0 text-sm">{file.name}</span>
                 </Link>
               </Media>
-              {file.metaTags && (
+              {file.tags && (
                 <div className="tags-container mt-2">
-                  {file.metaTags.map((tag, i) => (
+                  {file.tags.map((tag, i) => (
                     <Badge
                       key={tag + i}
                       className="badge-default mr-2"
