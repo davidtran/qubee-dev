@@ -1,8 +1,8 @@
 const Promise = require("bluebird");
 const express = require("express");
-const fsDebug = require("debug")("app:fs");
-const dbDebug = require("debug")("app:db");
-const debug = require("debug")("app:debug");
+// const fsDebug = require("debug")("app:fs");
+// const dbDebug = require("debug")("app:db");
+// const debug = require("debug")("app:debug");
 const multer = require("multer");
 const moment = require("moment");
 const fileExtension = require("file-extension");
@@ -48,17 +48,17 @@ const upload = multer({
 router.post("/", upload.array("mediaFiles", 12), async (req, res) => {
   const selectedFiles = req.files;
 
-  debug("Selected file ->", selectedFiles);
+  // debug("Selected file ->", selectedFiles);
 
   for (let selectedFile of selectedFiles) {
     const fileExt = fileExtension(selectedFile.originalname);
     const slug = selectedFile.originalname.replace(/\s+/g, "-").toLowerCase();
     const parentDirectoryId = JSON.parse(req.body.mediaFiles).parentDirectoryId;
 
-    dbDebug("Parent directory ID ->", parentDirectoryId);
+    // dbDebug("Parent directory ID ->", parentDirectoryId);
 
     if (!parentDirectoryId) {
-      dbDebug("Invalid folder");
+      // dbDebug("Invalid folder");
       return res.status(400).send("Invalid folder");
     }
 
@@ -72,23 +72,23 @@ router.post("/", upload.array("mediaFiles", 12), async (req, res) => {
 
     try {
       await fs.accessAsync(join(uploadsFolder, slug));
-      fsDebug("File already exists.");
+      // fsDebug("File already exists.");
       res.status(400).send("File already exists.");
     } catch (ex) {
       try {
         await fs.renameAsync(selectedFile.path, join(uploadsFolder, slug));
-        fsDebug("File moved to uploads folder successfully.");
+        // fsDebug("File moved to uploads folder successfully.");
         try {
           await file.save();
-          dbDebug("Document created successfully in MongoDB.", file);
+          // dbDebug("Document created successfully in MongoDB.", file);
           res.send(file);
         } catch (ex) {
           await fs.unlinkAsync(join(uploadsFolder, slug));
-          dbDebug("Could not create document in MongoDB.", ex);
+          // dbDebug("Could not create document in MongoDB.", ex);
           res.status(500).send("Could not create document in MongoDB.");
         }
       } catch (ex) {
-        fsDebug("Could not move file to uploads folder.", ex);
+        // fsDebug("Could not move file to uploads folder.", ex);
         res.status(500).send("Could not move file to  uploads folder.");
       }
     }
@@ -99,10 +99,10 @@ router.put("/:id", async (req, res) => {
   // const { error } = validate(req.body);
   // if (error) return res.status(400).send(error.details[0].message);
 
-  dbDebug(join(uploadsFolder, req.body.slug));
+  // dbDebug(join(uploadsFolder, req.body.slug));
 
   const oldFilename = await File.findById(req.params.id);
-  dbDebug(join(uploadsFolder, oldFilename.slug));
+  // dbDebug(join(uploadsFolder, oldFilename.slug));
 
   // const folder = await Folder.findById(req.body.folderId);
   // if (!folder) return res.status(400).send("Invalid folder.");
@@ -155,7 +155,7 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   const file = await File.findById(req.params.id);
 
-  dbDebug(file);
+  // dbDebug(file);
 
   if (!file)
     return res.status(404).send("The file with the given ID was not found.");
@@ -163,12 +163,12 @@ router.delete("/:id", async (req, res) => {
   await fs
     .unlinkAsync(join(uploadsFolder, file.slug))
     .then(() => {
-      fsDebug("File delete successfully!");
+      // fsDebug("File delete successfully!");
       file.remove();
       res.send(file);
     })
     .catch((ex) => {
-      fsDebug("File was not deleted.", ex);
+      // fsDebug("File was not deleted.", ex);
       res.status(500).send("File was not deleted. " + ex);
     });
 });

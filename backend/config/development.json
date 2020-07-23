@@ -1,6 +1,6 @@
 {
   "name": "qubee - Development",
-  "db_dev": "mongodb://localhost:27017/qubee",
+  "db_dev": "mongodb://localhost:27017/test?serverSelectionTimeoutMS=5000&connectTimeoutMS=10000&3t.uriVersion=3&database=test",
   "port": "5000",
   "requiresAuth": false
 }
