@@ -64,7 +64,7 @@ const Admin = (props) => {
           innerLink: "/admin/index",
           imgSrc: require("../assets/img/brand/qubee_logo.png"),
           imgAlt: "...",
-        }}        
+        }}
         getFiles={fetchFiles}
         getFolderId={"folderId"}
       />
@@ -77,7 +77,7 @@ const Admin = (props) => {
           <Route
             path="/admin/folder/:folderId"
             component={Files}
-          />                    
+          />
           <Route
             path="/admin/files"
             component={Files}

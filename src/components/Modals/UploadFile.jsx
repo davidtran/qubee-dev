@@ -11,11 +11,11 @@ registerPlugin(FilePondPluginFileMetadata);
 const UploadFile = ({
   buttonLabel,
   buttonIcon,
-  modalClassName,  
+  modalClassName,
 }) => {
   const { uploadFile, uploadFileStatuses, refresh } = useContext(FileContext);
   const [modal, setModal] = useState(false);
-  const toggle = () => {    
+  const toggle = () => {
     setModal(!modal);
   };
 
@@ -25,9 +25,9 @@ const UploadFile = ({
       files: [file],
     },
   }) {
-    if (validity.valid) {      
-      uploadFile(new Date().getTime(), file.name, file);      
-    }    
+    if (validity.valid) {
+      uploadFile(new Date().getTime(), file.name, file);
+    }
   }
 
   return (
@@ -67,19 +67,19 @@ const UploadFile = ({
           <div className="upload-file-list">
             {Object.values(uploadFileStatuses).map(fileStatus => (
               <div className="upload-file-item" key={fileStatus.id}>
-                <div className="upload-file-name">{fileStatus.name}</div>                                
-                {fileStatus.pending && 
+                <div className="upload-file-name">{fileStatus.name}</div>
+                {fileStatus.pending &&
                   <div className="upload-file-pending">Please wait</div>
                 }
-                {fileStatus.error && 
+                {fileStatus.error &&
                   <div className="upload-file-error">Error</div>
                 }
-                {fileStatus.success && 
+                {fileStatus.success &&
                   <div className="upload-file-success">Success</div>
                 }
               </div>
             ))}
-            
+
           </div>
         </div>
       </Modal>

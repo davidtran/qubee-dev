@@ -7,16 +7,8 @@ import fileSizeConversion from "../../utils/fileSizeConversion";
 import { FileContext } from "../../contexts/FileListContext";
 import moment from 'moment';
 
-function TableBody({
-  collection,
-  getFiles,
-  isSelected,
-  onCheckboxClick,
-  setFolderId,
-  setFileCount,
-  ...props
-}) {
-  const { files, selectedFileIds, toggleSelectFile } = useContext(FileContext);  
+function TableBody() {
+  const { files, selectedFileIds, toggleSelectFile } = useContext(FileContext);
 
   if (files.length) {
     return (
@@ -64,7 +56,6 @@ function TableBody({
                   <MetaTags
                     buttonLabel="add +"
                     fileId={file.id}
-                    getFiles={() => {}}
                   />
                 </div>
               )}
@@ -88,7 +79,7 @@ function TableBody({
         </tr>
       </tbody>
     );
-  }  
+  }
 }
 
 export default TableBody;

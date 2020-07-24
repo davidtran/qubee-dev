@@ -7,15 +7,15 @@ import { useRouteMatch, useLocation } from "react-router-dom";
 import queryString from 'query-string';
 
 const Files = () => {
-  const { fetchFiles } = useContext(FileContext);  
+  const { fetchFiles } = useContext(FileContext);
   const location = useLocation();
-  const match = useRouteMatch();  
+  const match = useRouteMatch();
   const query = queryString.parse(location.search);
   ;
   useEffect(() => {
-    fetchFiles({ 
-      folderId: match.params.folderId, 
-      keyword: query.query 
+    fetchFiles({
+      folderId: match.params.folderId,
+      keyword: query.query
     });
   }, [match.params.folderId, query.query]);
 

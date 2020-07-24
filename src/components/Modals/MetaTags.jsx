@@ -7,7 +7,7 @@ import { FileContext } from "../../contexts/FileListContext";
 const MetaTag = (props) => {
   const { files, updateTags } = useContext(FileContext);
   const { buttonLabel, modalClassName, fileId, getFiles } = props;
-  const [modal, setModal] = useState(false);  
+  const [modal, setModal] = useState(false);
   const [inputField, setInputField] = useState(null);
 
   const file = files.find(item => item.id === fileId);

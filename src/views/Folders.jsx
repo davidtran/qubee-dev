@@ -48,11 +48,11 @@ class Folders extends Component {
   // handleDelete = async (file) => {
   //   const originalFiles = this.state.files;
 
-  //   const files = this.state.files.filter((p) => p._id !== file._id);
+  //   const files = this.state.files.filter((p) => p._id !== file.id);
   //   this.setState({ files });
 
   //   try {
-  //     await http.delete(`${config.apiEndpoint}/${file._id}`);
+  //     await http.delete(`${config.apiEndpoint}/${file.id}`);
   //     //throw new Error("Something went wrong!");
   //   } catch (err) {
   //     // Expected (404: not found, 400: bad request) - Client Errors
@@ -115,17 +115,17 @@ class Folders extends Component {
                   </thead>
                   <tbody>
                     {this.state.folders.map((folder) => (
-                      <tr key={folder._id}>
+                      <tr key={folder.id}>
                         <th scope="row">
                           <div className="custom-control custom-checkbox mb-4">
                             <input
                               className="custom-control-input"
-                              id={folder._id}
+                              id={folder.id}
                               type="checkbox"
                             />
                             <label
                               className="custom-control-label"
-                              htmlFor={folder._id}
+                              htmlFor={folder.id}
                             ></label>
                           </div>
                         </th>
@@ -147,17 +147,17 @@ class Folders extends Component {
                       </tr>
                     ))}
                     {this.state.files.map((file) => (
-                      <tr key={file._id}>
+                      <tr key={file.id}>
                         <th scope="row">
                           <div className="custom-control custom-checkbox mb-4">
                             <input
                               className="custom-control-input"
-                              id={file._id}
+                              id={file.id}
                               type="checkbox"
                             />
                             <label
                               className="custom-control-label"
-                              htmlFor={file._id}
+                              htmlFor={file.id}
                             ></label>
                           </div>
                         </th>

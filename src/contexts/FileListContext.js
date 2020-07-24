@@ -24,21 +24,24 @@ export const FileContext = React.createContext({
   uploadFileStatuses: null,
   files: [],
   isRequestFileList: false,
-  requestFileListError: false,    
+  requestFileListError: false,
   selectedFileIds: [],
   isSeletedAll: false,
   sorting: {
     attribute: 'name',
     direction: 'ASC',
-  },  
+  },
   isCreatingFolder: false,
   createFolderError: null,
   updateTags: (fileId, tags) => {},
+  view: 'list',
+  toggleView: () => {},
 });
+
 
 export const FileContextProvider = ({ children }) => {
   const [fetchFilesParams, setFetchFilesParams] = useState({});
-  const [files, setFiles] = useState([]);  
+  const [files, setFiles] = useState([]);
   const [sorting, setSorting] = useState({
     attribute: 'name',
     direction: 'ASC',
@@ -50,13 +53,22 @@ export const FileContextProvider = ({ children }) => {
     error: requestFileListError,
   }] = useLazyQuery(filesQuery);
   const [uploadFileStatuses, setUploadFileStatuses] = useState({});
-  const [uploadFileMutation] = useMutation(uploadFileQuery); 
+  const [uploadFileMutation] = useMutation(uploadFileQuery);
   const [createFolderMutation, { loading: isCreatingFolder, error: createFolderError }] = useMutation(createFolderQuery);
   const [updateTagsMutation] = useMutation(updateTagsQuery);
   const [folderId, setFolderId] = useState(null);
+  const [view, setView] = useState('list');
+
+  function toggleView() {
+    if (view === 'list') {
+      setView('gallery');
+    } else {
+      setView('list');
+    }
+  }
 
   useEffect(() => {
-    if (fileListData) {      
+    if (fileListData) {
       const fileData = [
         ...fileListData.getFiles.files.map(file => ({
           ...file,
@@ -69,10 +81,10 @@ export const FileContextProvider = ({ children }) => {
           kind: 'FOLDER',
         }))
 
-      ]      
-      sortFiles(fileData, sorting.attribute, sorting.direction);      
+      ]
+      sortFiles(fileData, sorting.attribute, sorting.direction);
       setFiles(fileData);
-      
+
     }
   }, [fileListData]);
 
@@ -102,19 +114,19 @@ export const FileContextProvider = ({ children }) => {
     }
   }
 
-  async function refresh() {        
+  async function refresh() {
     await fetchFiles(fetchFilesParams);
   }
 
-  async function uploadFile(fileId, fileName, file) {    
-    setFileStatus({fileId, fileName, file, isUploading: true, error: false, success: false })    
-    try {      
+  async function uploadFile(fileId, fileName, file) {
+    setFileStatus({fileId, fileName, file, isUploading: true, error: false, success: false })
+    try {
       await uploadFileMutation({ variables: {
         file,
         folderId: folderId,
       }});
       refresh();
-      setFileStatus({fileId, isUploading: false, error: false, success: true });    
+      setFileStatus({fileId, isUploading: false, error: false, success: true });
     } catch (e) {
       setFileStatus({fileId, isUploading: false, error: true, success: false });
     }
@@ -127,14 +139,14 @@ export const FileContextProvider = ({ children }) => {
           folderName,
           folderId,
         }
-      });      
-      refresh(); 
+      });
+      refresh();
       return true;
     } catch (e) {
-      console.log(JSON.stringify(e, null, 2));      
+      console.log(JSON.stringify(e, null, 2));
     }
-  } 
-  
+  }
+
   async function fetchFiles({ folderId, keyword }) {
     setFetchFilesParams({ folderId, keyword });
     setFolderId(folderId);
@@ -144,14 +156,14 @@ export const FileContextProvider = ({ children }) => {
       keyword
     }});
   }
-  
+
   function selectAllFiles() {
     if (files.length === selectedFileIds.length) {
       setSelectedFileIds([]);
     } else {
       const ids = files.map(file => file.id);
       setSelectedFileIds(ids);
-    }    
+    }
   }
 
   function toggleSelectFile(fileId) {
@@ -160,10 +172,10 @@ export const FileContextProvider = ({ children }) => {
       setSelectedFileIds(selectedFileIds.filter(id => id !== fileId))
     } else {
       setSelectedFileIds([...selectedFileIds, fileId]);
-    }    
+    }
   }
 
-  function toggleSortDirection(attribute) {    
+  function toggleSortDirection(attribute) {
     let nextDirection = null;
     if (attribute === sorting.attribute) {
       nextDirection = sorting.direction === 'DESC' ? 'ASC' : 'DESC';
@@ -180,27 +192,27 @@ export const FileContextProvider = ({ children }) => {
 
   function downloadSelectedFiles() {
     if (selectedFileIds.length === 0) return;
-    const selectedFiles = selectedFileIds.map(id => files.find(file => file.kind === 'FILE' && file.id === id));    
+    const selectedFiles = selectedFileIds.map(id => files.find(file => file.kind === 'FILE' && file.id === id));
     const fileIds = selectedFiles.map(item => item.id);
     downloadFiles({ folderId, fileIds, selectedFiles, name: selectedFiles[0].name });
   }
 
   function getSelectedFiles() {
-    const selectedFiles = selectedFileIds.map(id => files.find(file => file.id === id));    
+    const selectedFiles = selectedFileIds.map(id => files.find(file => file.id === id));
     return selectedFiles;
   }
 
   function deselectFiles() {
     setSelectedFileIds([]);
   }
-  
+
   const isSeletedAll = files.length > 0 && selectedFileIds.length > 0 && files.length === selectedFileIds.length;
 
   const value = {
     fetchFiles,
     toggleSelectFile,
     selectAllFiles,
-    toggleSortDirection, 
+    toggleSortDirection,
     uploadFile,
     refresh,
     createFolder,
@@ -208,17 +220,19 @@ export const FileContextProvider = ({ children }) => {
     getSelectedFiles,
     deselectFiles,
     uploadFileStatuses,
-    files,    
+    files,
     isRequestFileList,
-    requestFileListError,    
+    requestFileListError,
     selectedFileIds,
-    sorting,      
+    sorting,
     isSeletedAll,
     isCreatingFolder,
     createFolderError,
     updateTags,
+    view,
+    toggleView,
   }
-  
+
   return (
     <FileContext.Provider value={value}>{children}</FileContext.Provider>
   )
