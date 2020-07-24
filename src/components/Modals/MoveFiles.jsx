@@ -9,19 +9,20 @@ import { FileOperationsContext } from "../../contexts/FileOperationsContext";
 const MoveFiles = ({
   buttonLabel,
   buttonIcon,
-  modalClassName,  
+  modalClassName,
 }) => {
   const [modal, setModal] = useState(false);
-  const { folders, selectedFolderId, selectFolder, fetchFolders } = useContext(FileOperationsContext);
+  const { folders, selectedFolderId, selectFolder, fetchFolders, moveFile } = useContext(FileOperationsContext);
 
-  const toggle = () => {    
+  const toggle = () => {
     fetchFolders();
     setModal(!modal);
   };
 
-  const handleProcessedFiles = () => { 
+  const handleProcessedFiles = () => {
+    moveFile();
   };
-  
+
   return (
     <>
       <Button block color="link" type="button" onClick={toggle}>
@@ -44,7 +45,7 @@ const MoveFiles = ({
           </button>
         </div>
         <div className="modal-body">
-          <UploadFolderPicker            
+          <UploadFolderPicker
             selectedFolderId={selectedFolderId}
             folders={folders}
             selectFolder={selectFolder}
@@ -54,7 +55,7 @@ const MoveFiles = ({
           <div className="text-center">
             <Button data-dismiss="modal" color="link" onClick={toggle}>
               Cancel
-            </Button>            
+            </Button>
             <Button
               color="primary"
               type="button"

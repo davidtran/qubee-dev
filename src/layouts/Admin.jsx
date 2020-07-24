@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Route, Switch, Redirect, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { Container } from "reactstrap";
@@ -14,6 +14,11 @@ import ActionBarHeader from "../components/Headers/ActionBarHeader";
 const Admin = (props) => {
   const location = useLocation();
   const { fetchFiles, selectedFileIds } = useContext(FileContext);
+
+  useEffect(() => {
+    document.body.classList.add("bg-default");
+    return () => document.body.classList.remove("bg-default");
+  }, []);
 
   function getBrandText(path) {
     for (let i = 0; i < routes.length; i++) {

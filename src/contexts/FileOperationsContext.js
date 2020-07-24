@@ -1,25 +1,27 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect } from "react";
 import { useMutation, useLazyQuery } from "@apollo/react-hooks";
 import { loader } from "graphql.macro";
 import { FileContext } from "./FileListContext";
 
-const filesQuery = loader('../queries/files.graphql');
+const filesQuery = loader("../queries/files.graphql");
 const renameFileQuery = loader("../queries/renameFile.graphql");
 const deleteFilesQuery = loader("../queries/deleteFiles.graphql");
 const renameFolderQuery = loader("../queries/renameFolder.graphql");
 const deleteFoldersQuery = loader("../queries/deleteFolders.graphql");
+const moveFileQuery = loader("../queries/moveFile.graphql");
 
 export const FileOperationsContext = React.createContext({
-  renameFileAndFolder: () => {},  
-  deleteFileAndFolder: () => {},  
+  renameFileAndFolder: () => {},
+  deleteFileAndFolder: () => {},
+  moveFile: () => {},
   isRenamePending: false,
   isRenameError: null,
   isDeletePending: false,
-  isDeleteError: null,  
+  isDeleteError: null,
   folders: [],
   selectedFolderId: null,
   selectFolder: () => {},
-  fetchFolders: () => {},  
+  fetchFolders: () => {},
 });
 
 export const FileOperationsContextProvider = ({ children }) => {
@@ -28,11 +30,14 @@ export const FileOperationsContextProvider = ({ children }) => {
   const [renameFolderMutation] = useMutation(renameFolderQuery);
   const [deleteFilesMutation] = useMutation(deleteFilesQuery);
   const [deleteFoldersMutation] = useMutation(deleteFoldersQuery);
+  const [moveFileMutation] = useMutation(moveFileQuery);
 
   const [isRenamePending, setIsRenamePending] = useState(false);
   const [isRenameError, setIsRenameError] = useState(null);
   const [isDeletePending, setIsDeletePending] = useState(false);
   const [isDeleteError, setIsDeleteError] = useState(null);
+  const [isMovePending, setIsMovePending] = useState(false);
+  const [isMoveError, setIsMoveError] = useState(null);
 
   const [folders, setFolders] = useState([]);
   const [selectedFolderId, setSelectedFolderId] = useState(null);
@@ -41,17 +46,42 @@ export const FileOperationsContextProvider = ({ children }) => {
   useEffect(() => {
     if (folderData) {
       setFolders(folderData.getFiles.folders);
-    }    
+    }
   }, [folderData]);
-  
+
   function selectFolder(folderId) {
     fetchFolderQuery({ variables: { folderId } });
+    setSelectedFolderId(folderId);
   }
 
   function fetchFolders() {
     fetchFolderQuery({ variables: { folderId: null } });
+    setSelectedFolderId(null);
   }
 
+  async function moveFile() {
+    const files = getSelectedFiles();
+    const fileIds = files
+      .filter((file) => file.kind === "FILE")
+      .map((file) => file.id);
+    console.log(selectedFolderId, files);
+    if (fileIds.length === 0) return;
+    setIsMovePending(true);
+    setIsMoveError(true);
+
+    try {
+      await moveFileMutation({
+        variables: { folderId: selectedFolderId, files: fileIds },
+      });
+      setIsMovePending(false);
+      setSelectedFolderId(null);
+      deselectFiles();
+      refresh();
+    } catch (e) {
+      setIsMoveError(true);
+      setIsMovePending(false);
+    }
+  }
 
   async function renameFileAndFolder(name) {
     const files = getSelectedFiles();
@@ -61,7 +91,7 @@ export const FileOperationsContextProvider = ({ children }) => {
     setIsRenamePending(true);
     setIsRenameError(null);
     try {
-      if (file.kind === 'FILE') {
+      if (file.kind === "FILE") {
         await renameFileMutation({
           variables: {
             fileId: file.id,
@@ -73,7 +103,7 @@ export const FileOperationsContextProvider = ({ children }) => {
           variables: {
             folderId: file.id,
             folderName: name,
-          }
+          },
         });
       }
       setIsRenamePending(false);
@@ -85,7 +115,6 @@ export const FileOperationsContextProvider = ({ children }) => {
     }
   }
 
-
   async function deleteFileAndFolder() {
     const files = getSelectedFiles();
     const deleteFileIds = files
@@ -94,13 +123,15 @@ export const FileOperationsContextProvider = ({ children }) => {
     const deleteFolderIds = files
       .filter((file) => file.kind === "FOLDER")
       .map((file) => file.id);
-    
+
     const pms = [];
     if (deleteFileIds.length > 0) {
-      pms.push(deleteFilesMutation({ variables: { files: deleteFileIds } }));      
+      pms.push(deleteFilesMutation({ variables: { files: deleteFileIds } }));
     }
     if (deleteFolderIds.length > 0) {
-      pms.push(deleteFoldersMutation({ variables: { folderIds: deleteFolderIds }}))
+      pms.push(
+        deleteFoldersMutation({ variables: { folderIds: deleteFolderIds } })
+      );
     }
 
     setIsDeletePending(true);
@@ -121,6 +152,9 @@ export const FileOperationsContextProvider = ({ children }) => {
   const value = {
     renameFileAndFolder,
     deleteFileAndFolder,
+    moveFile,
+    isMovePending,
+    isMoveError,
     isRenamePending,
     isRenameError,
     isDeletePending,
@@ -131,7 +165,6 @@ export const FileOperationsContextProvider = ({ children }) => {
     setSelectedFolderId,
     fetchFolders,
   };
-
 
   return (
     <FileOperationsContext.Provider value={value}>
