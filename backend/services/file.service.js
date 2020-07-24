@@ -17,20 +17,66 @@ const { STATUS_CONSTANT } = require('../constants/status-code.constant');
 const { raiseException } = require('../utils/response');
 const logger = require('../utils/logger');
 const { ApolloError, ForbiddenError } = require('apollo-server-express');
+const ffmpeg = require("fluent-ffmpeg");
+const imageThumbnail = require("image-thumbnail");
+const options = {
+  width: 1920,
+  height: 1080,
+  jpegOptions: { force: true, quality: 100 },
+};
+
+async function generateThumbnailForImage(path, thumbnailName) {
+  const thumbnail = await imageThumbnail(path, options);
+  await fs.writeFileSync(`${__thumbDir}/${thumbnailName}`, thumbnail);
+  return thumbnailName;
+}
+
+async function generateThumbnailForVideo(path, thumbnailName) {
+  return new Promise((resolve, reject) => {
+    ffmpeg(path)
+      .on("end", function () {
+        resolve(thumbnailName);
+      })
+      .on("error", function (err) {
+        reject(err);
+      })
+      .screenshots({
+        count: 1,
+        folder: __thumbDir,
+        size: "1920x1080",
+        filename: thumbnailName
+      });
+  });
+}
 
 async function uploadFileToSystem(fileUpload, folderId, folderPath, tags, userId, isSecured) {
   try {
     const { createReadStream, filename, mimetype } = fileUpload;
     const stream = createReadStream();
     const imageId = generateUniqueString();
-    const path = `${__uploadDir}/${folderPath}/${imageId}-${filename}`;
+    const path = `${__uploadDir}/${folderPath}/${filename}`;
+    const fileHasExist = await fs.existsSync(path);
+    if (fileHasExist) {
+      throw new ApolloError("File is existing", STATUS_CONSTANT.CONFLICT_CODE);
+    }
+    const isImage = mimetype.split('/')[0] === 'image';
+    const isVideo = mimetype.split('/')[0] === 'video';
+    let thumbnail = null;
     // Store the file in the filesystem.
     await new Promise((resolve, reject) => {
       // Create a stream to which the upload will be written.
       const writeStream = createWriteStream(path);
 
       // When the upload is fully written, resolve the promise.
-      writeStream.on('finish', resolve);
+      writeStream.on('finish', async () => {
+        if (isImage) {
+          thumbnail = await generateThumbnailForImage(path, `${filename}-${imageId}_thumbnail-image.jpg`);
+        }
+        if (isVideo) {
+          thumbnail = await generateThumbnailForVideo(path, `${filename}-${imageId}_thumbnail-video.jpg`)
+        }
+        resolve();
+      });
 
       // If there's an error writing the file, remove the partially written file
       // and reject the promise.
@@ -41,9 +87,9 @@ async function uploadFileToSystem(fileUpload, folderId, folderPath, tags, userId
       });
       stream.on('error', (error) => writeStream.destroy(error));
       stream.pipe(writeStream);
-    });
+    })
     const { size } = statSync(path);
-    return createNewFile(folderId, userId, { file_name: `${imageId}-${filename}`, type: mimetype, size, tags }, isSecured);
+    return createNewFile(folderId, userId, { file_name: `${filename}`, type: mimetype, size, tags, is_video: isVideo, is_image: isImage, thumbnail }, isSecured);
   } catch(error) {
     throw error;
   }
@@ -139,11 +185,19 @@ async function deleteFileItem(files, isHighLevel) {
     if (!listFiles || listFiles.length < 1) {
       throw new ApolloError("Can not find any file to remove");
     }
-    const listFilesWillBeRemoved = listFiles.map((item) => item.id);
+    const listFilesWillBeRemoved = [];
+    const listPathThumbnailWillRemove = [];
+    for (let i = 0; i < listFiles.length; i++) {
+      listFilesWillBeRemoved.push(listFiles[i].id);
+      if (listFiles[i].thumbnail) {
+        listPathThumbnailWillRemove.push(listFiles[i].thumbnail);
+      }
+    }
     await removeListFile(listFilesWillBeRemoved);
-    listFiles.map(file => {
-      unlink(join(__uploadDir, file.folder && file.folder.path ? file.folder.path : '', file.file_name), () => {});
-    });
+    await Promise.all([
+      ...listPathThumbnailWillRemove.map(path => fs.unlinkSync(join(__thumbDir, path))),
+      ...listFiles.map(file =>  fs.unlinkSync(join(__uploadDir, file.folder && file.folder.path ? file.folder.path : '', file.file_name)))
+    ]);
     return true;
   } catch (error) {
     throw error;

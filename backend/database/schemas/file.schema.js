@@ -8,7 +8,10 @@ const fileSchema = new Schema({
   type: { type: String, required: true },
   restricted: { type: Boolean, required: true, default: false },
   size: { type: Number, required: true },
-  tags: { type: [String], required: true, default: []}
+  tags: { type: [String], required: true, default: []},
+  thumbnail: { type: String, required: false },
+  is_video: { type: Boolean, required: true, default: false },
+  is_image: { type: Boolean, required: true, default: false }
 }, {
   collection: 'files',
   timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }

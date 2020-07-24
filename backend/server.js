@@ -41,7 +41,8 @@ db.once("open", async function () {
 
   await createUploadsDirs(
     join(__dirname, "../public", "uploads"),
-    join(__dirname, "../public", "shared")
+    join(__dirname, "../public", "shared"),
+    join(__dirname, "../public", "thumbnails")
   );
 });
 
@@ -51,7 +52,8 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use(zip());
-global.__uploadDir = join(__dirname, "../public", "uploads")
+global.__uploadDir = join(__dirname, "../public", "uploads");
+global.__thumbDir = join(__dirname, "../public", "thumbnails");
 // configuring the upload file routes
 app.use(express.static("public"));
 app.get('/', (req, res) => {

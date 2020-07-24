@@ -15,6 +15,9 @@ module.exports = gql`
     user: AuthorFile
     size: Int!
     tags: [String]!
+    is_video: Boolean!
+    is_image: Boolean!
+    thumbnail: String
   }
 
   type FilesAndFolders {
