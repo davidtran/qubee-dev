@@ -1,5 +1,6 @@
 const { createWriteStream, unlink, statSync, renameSync } = require('fs');
 const Promise = require("bluebird");
+const fs = Promise.promisifyAll(require("fs"));
 const { join } = require('path');
 const { MEDIA_DIR } = require('../constants/file.constant');
 const { generateUniqueString } = require('../helpers/string.helper');
@@ -8,7 +9,8 @@ const {
   createNewFile,
   getFileById,
   getListFileByIds,
-  removeListFile
+  removeListFile,
+  moveFilesIntoFolderId
 } = require('../repository/file.repository');
 const { getListChildFolder, findFolderById } = require('../repository/folder.repository');
 const { STATUS_CONSTANT } = require('../constants/status-code.constant');
@@ -168,4 +170,42 @@ async function handleChangeFileTags(fileId, tags, isEnoughPermission) {
   }
 }
 
-module.exports = { handleUploadFile, getListFileAndFolder, downloadFile, renameFileItem, deleteFileItem, handleChangeFileTags };
+async function handleMoveFile(folderId, files, isEnoughPermission) {
+  try {
+    let folder = {id: null, path: ''};
+    if (folderId) {
+      folder = await findFolderById(folderId);
+      if (!folder) {
+        throw new ApolloError('Can not find any folder', STATUS_CONSTANT.NOT_FOUND_CODE);
+      }
+    }
+    const listFiles = await getListFileByIds(files, isEnoughPermission);
+    if (!listFiles || listFiles.length < 1) {
+      throw new ApolloError("Can not find any file to remove");
+    }
+    const fileIdsToRemove = [];
+    const listFileToRename = [];
+    for (let i = 0; i < listFiles.length; i++) {
+      fileIdsToRemove.push(listFiles[i].id);
+      listFileToRename.push([
+        join(__uploadDir, listFiles[i].folder ? listFiles[i].folder.path : '', listFiles[i].file_name),
+        join(__uploadDir, folder.path, listFiles[i].file_name),
+      ]);
+    }
+    await moveFilesIntoFolderId(folder.id, fileIdsToRemove);
+    await Promise.all(listFileToRename.map((item) => fs.renameSync(item[0], item[1])));
+    return true;
+  } catch (error) {
+    throw error;
+  }
+}
+
+module.exports = {
+  handleUploadFile,
+  getListFileAndFolder,
+  downloadFile,
+  renameFileItem,
+  deleteFileItem,
+  handleChangeFileTags,
+  handleMoveFile
+};

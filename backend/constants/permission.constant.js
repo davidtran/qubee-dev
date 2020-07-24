@@ -5,7 +5,8 @@ const PERMISSIONS = {
   CAN_RENAME_ALL_FILES: 'can-rename-all-file',
   CAN_RENAME_ALL_FOLDERS: 'can-rename-all-folder',
   CAN_DELETE_ALL_FOLDERS: 'can-delete-all-folder',
-  CAN_TAGGING_ALL_FILES: 'can-tagging-all-file'
+  CAN_TAGGING_ALL_FILES: 'can-tagging-all-file',
+  CAN_MOVE_ALL_FILES: 'can-move-file'
 }
 
 module.exports = { PERMISSIONS };

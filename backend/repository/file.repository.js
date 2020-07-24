@@ -53,11 +53,21 @@ async function removeFilesByFolderIds(folderIds) {
   return File.deleteMany({ folder: { '$in': folderIds }});
 }
 
+async function moveFilesIntoFolderId(folderId, files) {
+  try {
+    await File.updateMany({ _id: { '$in': files }}, { folder: folderId });
+    return true;
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports = {
   getListFileByFolderId,
   createNewFile,
   getFileById,
   getListFileByIds,
   removeListFile,
-  removeFilesByFolderIds
+  removeFilesByFolderIds,
+  moveFilesIntoFolderId
 };

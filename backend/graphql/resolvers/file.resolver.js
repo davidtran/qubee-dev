@@ -6,7 +6,8 @@ const {
   downloadFile,
   renameFileItem,
   deleteFileItem,
-  handleChangeFileTags
+  handleChangeFileTags,
+  handleMoveFile
 } = require("../../services/file.service");
 const { findFolderById } = require("../../repository/folder.repository");
 const { ApolloError, ForbiddenError } = require("apollo-server-express");
@@ -78,6 +79,13 @@ module.exports = {
       async (_, { fileId, tags }, { user }) => {
         const isEnoughPermisison = (user.role.is_secured || user.role.permissions.includes(PERMISSIONS.CAN_TAGGING_ALL_FILES));
         return await handleChangeFileTags(fileId, tags, isEnoughPermisison);
+      }
+    ),
+    moveFile: combineResolvers(
+      isAuthenticated,
+      async (_, { folderId, files }, { user }) => {
+        const isEnoughPermisison = (user.role.is_secured || user.role.permissions.includes(PERMISSIONS.CAN_MOVE_ALL_FILES));
+        return await handleMoveFile(folderId, files, isEnoughPermisison);
       }
     )
   }

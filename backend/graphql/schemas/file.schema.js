@@ -34,6 +34,7 @@ module.exports = gql`
     renameFile(fileId: String!, fileName: String!): File
     removeFile(files: [String!]!): Boolean
     changeFileTags(fileId: String!, tags: [String!]!): File!
+    moveFile(folderId: String, files: [String!]!): Boolean
   }
   
   extend type Query {
