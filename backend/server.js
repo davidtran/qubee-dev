@@ -38,11 +38,11 @@ const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
 db.once("open", async function () {
   console.log("Connected to MonogoDB ->", mongo_dev);
-  await createUploadsDirs(
+  await createUploadsDirs([
     join(__dirname, "../public", "uploads"),
     join(__dirname, "../public", "shared"),
     join(__dirname, "../public", "thumbnails")
-  );
+  ]);
 });
 
 app.use(helmet());
