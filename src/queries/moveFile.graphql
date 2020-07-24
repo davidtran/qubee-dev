@@ -1,0 +1,3 @@
+mutation MoveFile($folderId: String, $files: [String!]!) {
+  moveFile(folderId: $folderId, files: $files)
+}

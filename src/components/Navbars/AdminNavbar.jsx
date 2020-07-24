@@ -30,8 +30,8 @@ const AdminNavbar = ({ brandText }) => {
 
   function handleSubmit(e) {
     e.preventDefault();
-    
-    if (inputEl && inputEl.current && inputEl.current.value.length > 0) {      
+
+    if (inputEl && inputEl.current && inputEl.current.value.length > 0) {
       history.push("/admin/files?query=" + inputEl.current.value);
     } else {
       history.push("/admin/files");
@@ -40,7 +40,7 @@ const AdminNavbar = ({ brandText }) => {
 
   return (
     <>
-      <Navbar className="navbar-top navbar-light" expand="md" id="navbar-main">
+      <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
         <Container fluid>
           <Link
             className="h4 mb-0 text-uppercase d-none d-lg-inline-block"
@@ -49,7 +49,7 @@ const AdminNavbar = ({ brandText }) => {
             {brandText}
           </Link>
           <Form
-            className="navbar-search navbar-search-light form-inline mr-3 d-none d-md-flex ml-lg-auto"
+            className="navbar-search navbar-search-dark form-inline mr-3 d-none d-md-flex ml-lg-auto"
             onSubmit={handleSubmit}
           >
             <FormGroup className="mb-0">
