@@ -7,12 +7,14 @@ const {
   renameFileItem,
   deleteFileItem,
   handleChangeFileTags,
-  handleMoveFile
+  handleMoveFile,
+  getUploadProgress,
 } = require("../../services/file.service");
 const { findFolderById } = require("../../repository/folder.repository");
 const { ApolloError, ForbiddenError } = require("apollo-server-express");
 const { STATUS_CONSTANT } =  require('../../constants/status-code.constant');
 const { PERMISSIONS } = require('../../constants/permission.constant');
+const { uploadMultiChunks } = require("../../services/fileUpload.service");
 
 module.exports = {
   Query: {
@@ -32,12 +34,29 @@ module.exports = {
         }
         return await getListFileAndFolder(folder, keyword, is_secured);
       }
+    ),
+    getUploadProgress: combineResolvers(
+      isAuthenticated,
+      async (_, { folderId, filename }, { user }) => {
+        let folderPath = '';
+        if (folderId) {
+          const folder = await findFolderById(folderId);
+          if (!folder) {
+            throw new ApolloError('Can not find this folder', STATUS_CONSTANT.NOT_FOUND_CODE);
+          }
+          if (folder.restricted && (user.role.permissions && !user.role.permissions.includes(PERMISSIONS.CAN_CREATE_FILE_IN_ALL_FOLDER) || !user.role)) {
+            throw new ForbiddenError("You don't have access to this action");
+          }
+          folderPath = folder.path;
+        }
+        return await getUploadProgress(folderId, folderPath, filename);
+      }
     )
   },
   Mutation: {
     uploadFile: combineResolvers(
       isAuthenticated,
-      async (_, { file: fileHasUpload, folderId, tags }, { user }) => {
+      async (_, { file: fileHasUpload, folderId, tags, totalChunks, chunkNumber }, { user }) => {
         let folderPath = '';
         if (folderId) {
           const folder = await findFolderById(folderId);
@@ -50,7 +69,7 @@ module.exports = {
           folderPath = folder.path;
         }
         const file = await fileHasUpload;
-        return await handleUploadFile(file, folderId || null, folderPath, tags, user.id, user.role.is_secured);
+        return await uploadMultiChunks(file, folderId || null, folderPath, totalChunks, chunkNumber, user.id, user.role.is_secured);
       }
     ),
     downloadFile: combineResolvers(

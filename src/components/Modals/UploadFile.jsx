@@ -5,6 +5,7 @@ import FilePondPluginFileMetadata from "filepond-plugin-file-metadata";
 import "react-toastify/dist/ReactToastify.css";
 import "filepond/dist/filepond.min.css";
 import { FileContext } from "../../contexts/FileListContext";
+import { FileUploadContext } from "../../contexts/FileUploadContext";
 
 registerPlugin(FilePondPluginFileMetadata);
 
@@ -13,7 +14,8 @@ const UploadFile = ({
   buttonIcon,
   modalClassName,
 }) => {
-  const { uploadFile, uploadFileStatuses, refresh } = useContext(FileContext);
+  const { uploadFile, statuses } = useContext(FileUploadContext);
+  const { folderId } = useContext(FileContext);
   const [modal, setModal] = useState(false);
   const toggle = () => {
     setModal(!modal);
@@ -26,7 +28,7 @@ const UploadFile = ({
     },
   }) {
     if (validity.valid) {
-      uploadFile(new Date().getTime(), file.name, file);
+      uploadFile(file, folderId);
     }
   }
 
@@ -65,8 +67,8 @@ const UploadFile = ({
         <div className="modal-body">
           <input type="file" required onChange={onChange} />
           <div className="upload-file-list">
-            {Object.values(uploadFileStatuses).map(fileStatus => (
-              <div className="upload-file-item" key={fileStatus.id}>
+            {Object.values(statuses).map(fileStatus => (
+              <div className="upload-file-item" key={fileStatus.filename}>
                 <div className="upload-file-name">{fileStatus.name}</div>
                 {fileStatus.pending &&
                   <div className="upload-file-pending">Please wait</div>

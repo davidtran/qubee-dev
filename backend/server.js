@@ -18,7 +18,7 @@ const { getUserLogined } = require('./services/authentication.service');
 const createUploadsDirs = require("./utils/createUploadsDirs");
 const { downloadFileAndFolder } = require('./services/file.service');
 const { adminAuthenticationMiddleware } = require('./middlewares/auth.middleware');
-
+const { graphqlUploadExpress } = require('graphql-upload');
 const app = express();
 const mongo_dev = config.get("db_dev");
 console.log(mongo_dev)
@@ -51,6 +51,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use(zip());
+
 global.__uploadDir = join(__dirname, "../public", "uploads");
 global.__thumbDir = join(__dirname, "../public", "thumbnails");
 // configuring the upload file routes

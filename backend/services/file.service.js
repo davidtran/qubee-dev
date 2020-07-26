@@ -1,5 +1,7 @@
 const { createWriteStream, unlink, statSync, renameSync } = require('fs');
 const Promise = require("bluebird");
+const uploader = require('huge-uploader-nodejs');
+
 const fs = Promise.promisifyAll(require("fs"));
 const { join } = require('path');
 const { MEDIA_DIR } = require('../constants/file.constant');
@@ -25,6 +27,7 @@ const options = {
   height: 1080,
   jpegOptions: { force: true, quality: 100 },
 };
+
 
 async function generateThumbnailForImage(path, thumbnailName) {
   const thumbnail = await imageThumbnail(path, options);
@@ -52,6 +55,7 @@ async function generateThumbnailForVideo(path, thumbnailName) {
 
 async function uploadFileToSystem(fileUpload, folderId, folderPath, tags, userId, isSecured) {
   try {
+
     const { createReadStream, filename, mimetype } = fileUpload;
     const stream = createReadStream();
     const imageId = generateUniqueString();
@@ -269,6 +273,31 @@ async function handleMoveFile(folderId, files, isEnoughPermission) {
   }
 }
 
+async function getUploadProgress(folderId, folderPath, filename) {
+  const tempFilename = `${folderId || 'null'}-${filename}`;
+  const path = `${__uploadDir}/${folderPath}/${filename}`;
+  const fileHasExist = await fs.existsSync(path);
+
+  if (fileHasExist) {
+    throw new ApolloError("File is existing", STATUS_CONSTANT.CONFLICT_CODE);
+  }
+
+  const tempDir = join(__dirname, "../public", "uploads", tempFilename);
+  const tempFileExist = await fs.existsSync(tempDir);
+
+  if (tempFileExist) {
+    const files = await fs.readdirSync(tempDir);
+    return {
+      isResumable: true,
+      lastChunkNumber: files.length,
+    };
+  } else {
+    return {
+      isResumable: false,
+    };
+  }
+}
+
 module.exports = {
   handleUploadFile,
   getListFileAndFolder,
@@ -276,5 +305,6 @@ module.exports = {
   renameFileItem,
   deleteFileItem,
   handleChangeFileTags,
-  handleMoveFile
+  handleMoveFile,
+  getUploadProgress
 };

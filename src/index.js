@@ -65,6 +65,7 @@ import { ApolloProvider } from "@apollo/react-hooks";
 import apolloClient from "./libs/apollo";
 import { FileContextProvider } from "./contexts/FileListContext";
 import { FileOperationsContextProvider } from "./contexts/FileOperationsContext";
+import { FileUploadContextProvider } from "./contexts/FileUploadContext";
 
 library.add(
   faFacebookF,
@@ -100,14 +101,16 @@ ReactDOM.render(
   <ApolloProvider client={apolloClient}>
     <BrowserRouter>
       <AuthenticationContextProvider>
-        <Switch>          
+        <Switch>
           <PrivateRoute
             path="/admin"
             render={(props) => (
               <FileContextProvider>
-                <FileOperationsContextProvider>
-                  <AdminLayout {...props} />
-                </FileOperationsContextProvider>
+                <FileUploadContextProvider>
+                  <FileOperationsContextProvider>
+                    <AdminLayout {...props} />
+                  </FileOperationsContextProvider>
+                </FileUploadContextProvider>
               </FileContextProvider>
             )}
           />

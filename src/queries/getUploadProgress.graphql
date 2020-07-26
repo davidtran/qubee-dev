@@ -1,0 +1,6 @@
+query GetUploadProgress($folderId: String, $filename: String!) {
+  getUploadProgress(folderId: $folderId, filename: $filename) {
+    isResumable
+    lastChunkNumber
+  }
+}

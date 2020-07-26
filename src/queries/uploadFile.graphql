@@ -1,5 +1,5 @@
-mutation UploadFile($file: Upload!, $folderId: String) {
-  uploadFile(file: $file, folderId: $folderId) {
+mutation UploadFile($file: Upload!, $folderId: String, $totalChunks: Int, $chunkNumber: Int) {
+  uploadFile(file: $file, folderId: $folderId, totalChunks: $totalChunks, chunkNumber: $chunkNumber) {
     file_name,
     type,
     id
