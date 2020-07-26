@@ -14,7 +14,7 @@ const Icon = ({ file }) => {
   const fileIcon = fileIcons[fileExtension];
 
   // If video file, display the PlayButton
-  if (file.isVideo) return <PlayButton />;
+  if (file.is_video) return <PlayButton />;
   // If not video file, display the fileIcon; if the fileIcon is not found, display the Unknown
   else
     return fileIcon ? (
@@ -25,7 +25,7 @@ const Icon = ({ file }) => {
 };
 
 export default function FileCardBody({ file, isSelected, isFile }) {
-  const isVideoOrImage = file.isVideo || file.isImage;
+  const isVideoOrImage = file.is_video || file.is_image;
 
   const cardbody = (
     <CardBody
@@ -34,7 +34,7 @@ export default function FileCardBody({ file, isSelected, isFile }) {
 
         // If it's a video file, set backgroundImage accordingly
         backgroundImage: isVideoOrImage
-          ? `url("/${file.thumbnail}")`
+          ? `url("/thumbnails/${file.thumbnail}")`
           : "",
 
         backgroundSize: "cover",
@@ -44,7 +44,7 @@ export default function FileCardBody({ file, isSelected, isFile }) {
     >
       {/* If file kind is "FILE" and it's not an image, display the icons; else display the folder icon */}
       {isFile ? (
-        !file.isImage && <Icon file={file} />
+        !file.is_image && <Icon file={file} />
       ) : (
         <FontAwesomeIcon icon="folder-open" />
       )}

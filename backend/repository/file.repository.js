@@ -1,4 +1,5 @@
 const File = require('../database/schemas/file.schema');
+const Folder = require('../database/schemas/folder.schema');
 const mongose = require('mongoose');
 
 async function getListFileByFolderId(folderId, keyword = null, isHighLevel = false, listIds = []) {
@@ -13,6 +14,20 @@ async function getListFileByFolderId(folderId, keyword = null, isHighLevel = fal
     condition._id = { "$in": listIds };
   }
   return File.find(condition);
+}
+
+async function getListFolderByFolderId(folderId, keyword = null, isHighLevel = false, listIds = []) {
+  const condition = { folder: folderId };
+  if (keyword) {
+    condition.$text = {$search: keyword};
+  }
+  if (!isHighLevel) {
+    condition.restricted = false;
+  }
+  if (listIds && listIds.length > 0) {
+    condition._id = { "$in": listIds };
+  }
+  return Folder.find(condition);
 }
 
 async function createNewFile(folder, user, data, isRestricted) {
@@ -64,6 +79,7 @@ async function moveFilesIntoFolderId(folderId, files) {
 
 module.exports = {
   getListFileByFolderId,
+  getListFolderByFolderId,
   createNewFile,
   getFileById,
   getListFileByIds,

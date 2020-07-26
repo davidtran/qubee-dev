@@ -16,7 +16,7 @@ const rootSchema = require('./graphql/root.schema');
 const resolvers = require('./graphql/root.resolvers');
 const { getUserLogined } = require('./services/authentication.service');
 const createUploadsDirs = require("./utils/createUploadsDirs");
-const { downloadFile } = require('./services/file.service');
+const { downloadFileAndFolder } = require('./services/file.service');
 const { adminAuthenticationMiddleware } = require('./middlewares/auth.middleware');
 
 const app = express();
@@ -58,7 +58,7 @@ app.use(express.static("public"));
 app.get('/', (req, res) => {
   return res.json({ raw: true })
 });
-app.post('/download', adminAuthenticationMiddleware, downloadFile);
+app.post('/download', adminAuthenticationMiddleware, downloadFileAndFolder);
 
 const serverGraph = new ApolloServer({
   typeDefs: rootSchema,

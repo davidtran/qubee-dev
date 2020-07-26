@@ -10,7 +10,8 @@ const {
   getFileById,
   getListFileByIds,
   removeListFile,
-  moveFilesIntoFolderId
+  moveFilesIntoFolderId,
+  getListFolderByFolderId
 } = require('../repository/file.repository');
 const { getListChildFolder, findFolderById } = require('../repository/folder.repository');
 const { STATUS_CONSTANT } = require('../constants/status-code.constant');
@@ -119,9 +120,9 @@ async function getListFileAndFolder(folder, keyword, isRestricted) {
   }
 }
 
-async function downloadFile(req, res) {
+async function downloadFileAndFolder(req, res) {
   try {
-    const { body: { folderId, files, folderName }, user: { role: { is_secured: isHighLevel } } } = req;
+    const { body: { folderId, folders, files, folderName }, user: { role: { is_secured: isHighLevel } } } = req;
     let folder = null;
     if (folderId) {
       folder = await findFolderById(folderId);
@@ -129,24 +130,38 @@ async function downloadFile(req, res) {
         return raiseException(res, 403, "You don't have permission to this action");
       }
     }
-    const data = await getListFileByFolderId(folderId, null, isHighLevel, files);
-    if (!data || data.length < 1) {
+
+    let fileModels = [];
+    let folderModels = [];
+    if (files && files.length > 0) {
+      fileModels = await getListFileByFolderId(folderId, null, isHighLevel, files);
+    }
+    if (folders && folders.length > 0) {
+      folderModels = await getListFolderByFolderId(folderId, null, isHighLevel, folders);
+    }
+
+    if ((!fileModels || fileModels.length < 1) && (!folderModels || folderModels.length === 0)) {
       return raiseException(res, 404, "No content to download");
     }
-    if (data.length > 1) {
-      const zipFiles = data
-        .filter(file => !!file)
-        .map(file => ({
-          path: join(__uploadDir, folder ? folder.path : '', file.file_name),
-          name: file.file_name,
-        }));
-      await res.zip({
-        files: zipFiles,
-        filename: (folderName || (folder && folder.name) || 'File') + '.zip'
-      });
-    } else {
-      const file = data[0];
-      const filename = join(__uploadDir, folder ? folder.path : '', file.file_name);    
+
+    if (fileModels.length > 1 || folderModels.length > 0) {
+        const zipFiles = [
+          ...fileModels.map(file => ({
+            path: join(__uploadDir, folder ? folder.path : '', file.file_name),
+            name: file.file_name,
+          })),
+          ...folderModels.map(folderItem => ({
+            path: join(__uploadDir, folder ? folder.path : '', folderItem.path),
+            name: folderItem.name,
+          })),
+        ];
+        await res.zip({
+          files: zipFiles,
+          filename: (folderName || (folder && folder.name) || 'File') + '.zip'
+        });
+    } else if (fileModels.length === 1) {
+      const file = fileModels[0];
+      const filename = join(__uploadDir, folder ? folder.path : '', file.file_name);
       return res.download(filename);
     }
   } catch(error) {
@@ -211,7 +226,7 @@ async function handleChangeFileTags(fileId, tags, isEnoughPermission) {
     }
     const file = await getFileById(fileId);
     if (!file) {
-      throw new ApolloError('Can not find any file', STATUS_CONSTANT.NOT_FOUND_CODE); 
+      throw new ApolloError('Can not find any file', STATUS_CONSTANT.NOT_FOUND_CODE);
     }
     if (file.restricted && !isEnoughPermission) {
       throw new ForbiddenError("You don't have access to this action");
@@ -257,7 +272,7 @@ async function handleMoveFile(folderId, files, isEnoughPermission) {
 module.exports = {
   handleUploadFile,
   getListFileAndFolder,
-  downloadFile,
+  downloadFileAndFolder,
   renameFileItem,
   deleteFileItem,
   handleChangeFileTags,

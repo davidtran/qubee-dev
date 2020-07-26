@@ -9,6 +9,8 @@ query GetFiles($folderId: String, $keyword: String) {
       created_at
       thumbnail
       tags
+      is_video
+      is_image
     },
     folders {
       id,

@@ -27,6 +27,6 @@ module.exports = {
       async (_, { folderIds }, { user }) => {
         return await removeFolderItem(folderIds, user);
       }
-    )
+    ),
   }
 };

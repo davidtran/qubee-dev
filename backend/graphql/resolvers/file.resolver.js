@@ -3,7 +3,7 @@ const { isAuthenticated } = require("./authorization.resolver");
 const {
   handleUploadFile,
   getListFileAndFolder,
-  downloadFile,
+  downloadFileAndFolder,
   renameFileItem,
   deleteFileItem,
   handleChangeFileTags,
@@ -57,7 +57,7 @@ module.exports = {
       isAuthenticated,
       async (_, { folderId, folders, files }, { user }) => {
         const isHighLevel = user.role.is_secured;
-        return await downloadFile(folderId, folders, files, isHighLevel);
+        return await downloadFileAndFolder(folderId, folders, files, isHighLevel);
       }
     ),
     renameFile: combineResolvers(

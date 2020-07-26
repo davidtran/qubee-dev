@@ -3,6 +3,7 @@ import { useMutation, useLazyQuery } from "@apollo/react-hooks";
 import { loader } from "graphql.macro";
 import { sortFiles } from '../utils/sortFiles';
 import { downloadFiles } from '../services/fileService';
+import { toast } from "react-toastify";
 
 const updateTagsQuery = loader('../queries/updateTags.graphql');
 const filesQuery = loader('../queries/files.graphql');
@@ -128,6 +129,10 @@ export const FileContextProvider = ({ children }) => {
       refresh();
       setFileStatus({fileId, isUploading: false, error: false, success: true });
     } catch (e) {
+      if (e.message === 'GraphQL error: File is existing') {
+        toast.error('File already exists');
+      }
+      console.log(JSON.stringify(e, null, 2));
       setFileStatus({fileId, isUploading: false, error: true, success: false });
     }
   }
@@ -191,10 +196,11 @@ export const FileContextProvider = ({ children }) => {
   }
 
   function downloadSelectedFiles() {
-    if (selectedFileIds.length === 0) return;
-    const selectedFiles = selectedFileIds.map(id => files.find(file => file.kind === 'FILE' && file.id === id));
-    const fileIds = selectedFiles.map(item => item.id);
-    downloadFiles({ folderId, fileIds, selectedFiles, name: selectedFiles[0].name });
+    const fileAndFolder = getSelectedFiles();
+    if (fileAndFolder.length === 0) return;
+    const fileIds = fileAndFolder.filter(item => item.kind === 'FILE').map(item => item.id);
+    const folderIds = fileAndFolder.filter(item => item.kind === 'FOLDER').map(item => item.id);
+    downloadFiles({ folderId, fileIds, folderIds, name: fileAndFolder[0].name });
   }
 
   function getSelectedFiles() {

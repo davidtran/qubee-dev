@@ -11,7 +11,7 @@ const Files = () => {
   const location = useLocation();
   const match = useRouteMatch();
   const query = queryString.parse(location.search);
-  ;
+  
   useEffect(() => {
     fetchFiles({
       folderId: match.params.folderId,
