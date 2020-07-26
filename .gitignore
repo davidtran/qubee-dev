@@ -5,3 +5,5 @@ uploads/
 shared/
 tmp/
 build/
+*.log
+*.log.*
