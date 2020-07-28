@@ -9,7 +9,7 @@ const { generateUniqueString } = require('../helpers/string.helper');
 const { STATUS_CONSTANT } = require('../constants/status-code.constant');
 const { createNewFile } = require('../repository/file.repository');
 const { ApolloError, ForbiddenError } = require('apollo-server-express');
-
+const FileType = require('file-type');
 const options = {
   width: 1920,
   height: 1080,
@@ -19,14 +19,12 @@ const options = {
 async function uploadMultiChunks(fileUpload, folderId, folderPath, totalChunks, chunkNumber, userId, isSecured) {
   try {
     const fileId = `${folderId}-${fileUpload.filename}`;
-    const { createReadStream, filename, mimetype } = fileUpload;
+    const { createReadStream, filename } = fileUpload;
     const stream = createReadStream();
     const imageId = generateUniqueString();
     const tempDir = join(__dirname, "../public", "uploads/", fileId);
     const path = join(__uploadDir, folderPath, filename);
     const fileHasExist = await fs.existsSync(path);
-    const isImage = mimetype.split('/')[0] === 'image';
-    const isVideo = mimetype.split('/')[0] === 'video';
 
     if (fileHasExist) {
       throw new ApolloError("File is existing", STATUS_CONSTANT.CONFLICT_CODE);
@@ -63,14 +61,17 @@ async function uploadMultiChunks(fileUpload, folderId, folderPath, totalChunks, 
     if (chunkNumber === totalChunks) {
       await combineTempFiles(tempDir, path);
       // remove temp dir
-      //await rimraf.sync(tempDir);
-      thumbnail = await createFileThumbnail(fileUpload, path, imageId);
+      await rimraf.sync(tempDir);
+      const fileType = await FileType.fromFile(path);
+      const mimetype = fileType.mime;
+      const isImage = mimetype.split('/')[0] === 'image';
+      const isVideo = mimetype.split('/')[0] === 'video';
+      thumbnail = await createFileThumbnail(fileUpload, path, imageId, isImage, isVideo);
       const { size } = statSync(path);
       return createNewFile(folderId, userId, { file_name: `${filename}`, type: mimetype, size, tags: [], is_video: isVideo, is_image: isImage, thumbnail }, isSecured);
     }
   } catch(error) {
     console.log('general error', error);
-
     throw error;
   }
 }
@@ -78,7 +79,6 @@ async function uploadMultiChunks(fileUpload, folderId, folderPath, totalChunks, 
 async function combineTempFiles(tempDir, target) {
   return new Promise(async (resolve, reject) => {
     const files = await fs.readdirSync(tempDir);
-    console.log(files);
 
     files.sort((file1, file2) => {
       if (parseInt(file1) < parseInt(file2)) {
@@ -111,10 +111,8 @@ async function combineTempFiles(tempDir, target) {
   });
 }
 
-async function createFileThumbnail(fileUpload, uploadedPath, imageId) {
-  const { createReadStream, filename, mimetype } = fileUpload;
-  const isImage = mimetype.split('/')[0] === 'image';
-  const isVideo = mimetype.split('/')[0] === 'video';
+async function createFileThumbnail(fileUpload, uploadedPath, imageId, isImage, isVideo) {
+  const { filename } = fileUpload;
   let thumbnail = null;
   if (isImage) {
     thumbnail = await generateThumbnailForImage(uploadedPath, `${filename}-${imageId}_thumbnail-image.jpg`);

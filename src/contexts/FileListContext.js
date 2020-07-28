@@ -237,6 +237,7 @@ export const FileContextProvider = ({ children }) => {
     updateTags,
     view,
     toggleView,
+    folderId,
   }
 
   return (

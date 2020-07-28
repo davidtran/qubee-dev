@@ -5,9 +5,8 @@ import { ApolloLink } from 'apollo-link';
 import { setContext } from 'apollo-link-context';
 import  { createUploadLink } from 'apollo-upload-client';
 
-const authLink = setContext((_, { headers }) => {  
-  const token = localStorage.getItem('JWT_STORAGE_KEY');  
-  console.log(headers, 111);
+const authLink = setContext((_, { headers }) => {
+  const token = localStorage.getItem('JWT_STORAGE_KEY');
   return {
     headers: {
       ...headers,
@@ -20,7 +19,7 @@ const client = new ApolloClient({
   link: ApolloLink.from([
     authLink,
     onError(({ graphQLErrors, networkError }) => {
-      console.log(graphQLErrors);      
+      console.log(graphQLErrors);
       if (graphQLErrors)
         graphQLErrors.forEach(({ message, locations, path }) =>
           console.log(
@@ -38,8 +37,8 @@ const client = new ApolloClient({
     }),
     createUploadLink({
       uri: process.env.REACT_APP_GRAPHQL_URL,
-      credentials: 'same-origin',      
-    }),    
+      credentials: 'same-origin',
+    }),
   ]),
   cache: new InMemoryCache(),
   defaultOptions: {

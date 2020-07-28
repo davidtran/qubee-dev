@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { FilePond, registerPlugin } from "react-filepond";
 import { Button, Modal } from "reactstrap";
 import FilePondPluginFileMetadata from "filepond-plugin-file-metadata";
@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "filepond/dist/filepond.min.css";
 import { FileContext } from "../../contexts/FileListContext";
 import { FileUploadContext } from "../../contexts/FileUploadContext";
+import FileUploader from "../Uploader/FileUploader";
 
 registerPlugin(FilePondPluginFileMetadata);
 
@@ -14,22 +15,27 @@ const UploadFile = ({
   buttonIcon,
   modalClassName,
 }) => {
-  const { uploadFile, statuses } = useContext(FileUploadContext);
+  const { uploadFiles, statuses, removeFile, clearFileStatuses } = useContext(FileUploadContext);
   const { folderId } = useContext(FileContext);
   const [modal, setModal] = useState(false);
+  const [isUploadStarted, setIsUploadStarted] = useState(false);
+
   const toggle = () => {
+    clearFileStatuses();
     setModal(!modal);
   };
 
-  function onChange({
-    target: {
-      validity,
-      files: [file],
-    },
-  }) {
-    if (validity.valid) {
-      uploadFile(file, folderId);
+  useEffect(() => {
+    if (isUploadStarted && Object.values(statuses).every(item => item.success)) {
+      setIsUploadStarted(false);
+      setModal(false);
     }
+  }, [statuses]);
+
+  async function handleUploadFiles(files) {
+    setIsUploadStarted(true);
+    console.log(folderId);
+    await uploadFiles(files, folderId);
   }
 
   return (
@@ -65,24 +71,14 @@ const UploadFile = ({
           </button>
         </div>
         <div className="modal-body">
-          <input type="file" required onChange={onChange} />
-          <div className="upload-file-list">
-            {Object.values(statuses).map(fileStatus => (
-              <div className="upload-file-item" key={fileStatus.filename}>
-                <div className="upload-file-name">{fileStatus.name}</div>
-                {fileStatus.pending &&
-                  <div className="upload-file-pending">Please wait</div>
-                }
-                {fileStatus.error &&
-                  <div className="upload-file-error">Error</div>
-                }
-                {fileStatus.success &&
-                  <div className="upload-file-success">Success</div>
-                }
-              </div>
-            ))}
-
-          </div>
+          <FileUploader
+            onSelectFiles={files => {
+              handleUploadFiles(files);
+            }}
+            removeUpload={file => removeFile(file)}
+            retryUpload={file => handleUploadFiles([file])}
+            statuses={statuses}
+          />
         </div>
       </Modal>
     </div>

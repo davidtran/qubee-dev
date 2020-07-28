@@ -3,6 +3,7 @@ import Promise from 'bluebird';
 import { loader } from "graphql.macro";
 import { useMutation, useApolloClient } from '@apollo/react-hooks';
 import { FileContext } from './FileListContext';
+import { toast } from 'react-toastify';
 const uploadFileQuery = loader('../queries/uploadFile.graphql');
 const getUploadProgressQuery = loader('../queries/getUploadProgress.graphql');
 
@@ -16,15 +17,20 @@ export const FileUploadContextProvider = ({ children }) => {
   const [uploadFileStatuses, setUploadFileStatuses] = useState({});
   const [uploadFileMutation] = useMutation(uploadFileQuery);
   const client = useApolloClient();
-  const CHUNK_SIZE = 300000; // 1MB
+  const CHUNK_SIZE = 1000000; // 1MB
 
-  async function uploadFile(file, folderId) {
+  async function uploadFiles(files, folderId) {
+    const pms = [];
+    for (let i = 0; i < files.length; i++) {
+      pms.push(handleUploadFile(files[i], folderId));
+    }
+    return await Promise.all(pms);
+  }
+
+  async function handleUploadFile(file, folderId) {
     const reader = new FileReader();
     const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
-    const fileId = folderId + '-' + file.name;
     let chunkCount = 1;
-
-    console.log(file.size);
 
     function getNextChunk() {
       return new Promise((resolve, reject) => {
@@ -32,7 +38,7 @@ export const FileUploadContextProvider = ({ children }) => {
         const start = length * (chunkCount - 1);
 
         reader.onload = () => {
-          const chunk = new Blob([reader.result]);
+          const chunk = new Blob([reader.result]  );
           chunk.name = file.name;
           resolve(chunk);
         };
@@ -41,41 +47,37 @@ export const FileUploadContextProvider = ({ children }) => {
         } else {
           reader.readAsArrayBuffer(file.slice(start, start + length));
         }
-
       });
     }
 
+    async function sendChunk() {
+      try {
+        const chunk = await getNextChunk();
 
-    function sendChunk() {
-      return getNextChunk()
-        .then(chunk => {
-          return uploadFileMutation({ variables: {
-            file: chunk,
-            filename: file.name,
-            folderId: folderId,
-            totalChunks,
-            chunkNumber: chunkCount
-          }})
-        })
-        .then(() => {
-          if (chunkCount < totalChunks) {
-            const progress = Math.round(chunkCount / totalChunks * 100);
-            setFileStatus({ filename: file.name, progress, isUploading: true, error: false, success: false });
-            chunkCount++;
-            sendChunk();
-          } else {
-            refresh();
-            setFileStatus({ filename: file.name, progress: 100, isUploading: false, error: false, success: true });
-          }
-        })
-        .catch((e) => {
-          console.log(e);
-          setFileStatus({ filename: file.name, isUploading: false, error: true, success: false });
-        });
+        await uploadFileMutation({ variables: {
+          file: chunk,
+          filename: file.name,
+          folderId: folderId,
+          totalChunks,
+          chunkNumber: chunkCount
+        }})
+
+        if (chunkCount < totalChunks) {
+          const progress = Math.round(chunkCount / totalChunks * 100);
+          _setFileStatus({ file, progress, isUploading: true, error: false, success: false });
+          chunkCount++;
+          sendChunk();
+        } else {
+          refresh();
+          _setFileStatus({ file, progress: 100, isUploading: false, error: false, success: true });
+        }
+      } catch (e) {
+        _setFileStatus({ file, isUploading: false, error: true, success: false });
+      }
     }
 
     try {
-      setFileStatus({ filename: file.name, progress: 0, isUploading: true, error: false, success: false });
+      _setFileStatus({ file, progress: 0, isUploading: true, error: false, success: false });
       const uploadProgress = await client.query({
         query: getUploadProgressQuery,
         variables: {
@@ -84,31 +86,50 @@ export const FileUploadContextProvider = ({ children }) => {
         }
       });
 
-      if (uploadProgress.data.getUploadProgress.isResumable) {
+      if (uploadProgress.errors && uploadProgress.errors[0]) {
+        toast.error(uploadProgress.errors[0].message);
+        _setFileStatus({ file, progress: 0, isUploading: false, error: true, success: false });
+        return false;
+      }
+
+      if (uploadProgress.data.getUploadProgress && uploadProgress.data.getUploadProgress.isResumable) {
         chunkCount = uploadProgress.data.getUploadProgress.lastChunkNumber + 1;
       }
-      sendChunk();
+
+      return sendChunk();
     } catch (e) {
-      console.log(e);
+      _setFileStatus({ file, progress: 0, isUploading: false, error: true, success: false });
     }
   }
 
+  function clearFileStatuses() {
+    setUploadFileStatuses({});
+  }
 
-  function setFileStatus({ filename, progress, isUploading, error, success }) {
-    setUploadFileStatuses({
-      ...uploadFileStatuses,
-      [filename]: {
+  function _setFileStatus({ file, progress, isUploading, error, success }) {
+    setUploadFileStatuses(state => ({
+      ...state,
+      [file.name]: {
+        file,
         progress,
         isUploading,
         error,
         success
       }
-    });
+    }));
+  }
+
+  function removeFile(file) {
+    const newStatus = {...uploadFileStatuses};
+    delete newStatus[file.name];
+    setUploadFileStatuses(newStatus);
   }
 
   const value = {
     statuses: uploadFileStatuses,
-    uploadFile,
+    uploadFiles,
+    removeFile,
+    clearFileStatuses,
   }
 
   return (

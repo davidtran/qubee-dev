@@ -39,6 +39,7 @@
     "express-graphql": "^0.11.0",
     "fastest-validator": "^1.5.1",
     "file-extension": "^4.0.5",
+    "file-type": "^14.6.2",
     "fluent-ffmpeg": "^2.1.2",
     "formidable": "^1.2.2",
     "graphql": "^15.3.0",

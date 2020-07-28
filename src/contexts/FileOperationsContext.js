@@ -64,7 +64,7 @@ export const FileOperationsContextProvider = ({ children }) => {
     const fileIds = files
       .filter((file) => file.kind === "FILE")
       .map((file) => file.id);
-    console.log(selectedFolderId, files);
+
     if (fileIds.length === 0) return;
     setIsMovePending(true);
     setIsMoveError(true);
