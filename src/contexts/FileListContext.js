@@ -58,7 +58,7 @@ export const FileContextProvider = ({ children }) => {
   const [createFolderMutation, { loading: isCreatingFolder, error: createFolderError }] = useMutation(createFolderQuery);
   const [updateTagsMutation] = useMutation(updateTagsQuery);
   const [folderId, setFolderId] = useState(null);
-  const [view, setView] = useState('list');
+  const [view, setView] = useState('gallery');
 
   function toggleView() {
     if (view === 'list') {
