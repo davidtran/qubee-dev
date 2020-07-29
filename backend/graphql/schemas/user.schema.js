@@ -5,7 +5,7 @@ module.exports = gql`
     permissions: [String]!
     type: String!
     is_archive: Boolean!
-  }  
+  }
 
   type User {
     id: String!
@@ -18,7 +18,7 @@ module.exports = gql`
   extend type Query {
     profile: User
   }
-  
+
   extend type Mutation {
     signup(email: String!, password: String!, name: String!): LoginResponse
   }

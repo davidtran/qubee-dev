@@ -17,7 +17,7 @@ export const FileUploadContextProvider = ({ children }) => {
   const [uploadFileStatuses, setUploadFileStatuses] = useState({});
   const [uploadFileMutation] = useMutation(uploadFileQuery);
   const client = useApolloClient();
-  const CHUNK_SIZE = 1000000; // 1MB
+  const CHUNK_SIZE = 10000000; // 10MB
 
   async function uploadFiles(files, folderId) {
     const pms = [];

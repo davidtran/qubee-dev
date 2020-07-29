@@ -121,9 +121,9 @@ export default function FileCardFooter({ file, isSelected, isFile }) {
             </small>
           </p>
         )}
-        {file.metaTags && (
+        {file.tags && (
           <div className="tags-container mt-1">
-            {file.metaTags.map((tag, i) => (
+            {file.tags.map((tag, i) => (
               <Badge
                 key={tag + i}
                 className="badge-default mr-2"

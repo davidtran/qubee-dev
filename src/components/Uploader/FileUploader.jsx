@@ -15,10 +15,12 @@ const FileUploader = ({
   const inputEl = useRef();
   const dropLabelEl = useRef();
 
-  async function onChange({ target: { validity, files } }) {
-    if (validity.valid) {
-      onSelectFiles(files);
+  async function onChange(e) {
+    e.preventDefault();
+    if (e.target.validity.valid) {
+      onSelectFiles(e.target.files);
     }
+    return false;
   }
 
   return (

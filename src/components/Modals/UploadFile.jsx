@@ -34,8 +34,11 @@ const UploadFile = ({
 
   async function handleUploadFiles(files) {
     setIsUploadStarted(true);
-    console.log(folderId);
-    await uploadFiles(files, folderId);
+    try {
+      await uploadFiles(files, folderId);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   return (

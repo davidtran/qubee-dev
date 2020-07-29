@@ -15,15 +15,18 @@ const options = {
   height: 1080,
   jpegOptions: { force: true, quality: 100 },
 };
+const supportImageExt = ['png', 'jpeg', 'gif', 'bmp', 'jpg'];
 
 async function uploadMultiChunks(fileUpload, folderId, folderPath, totalChunks, chunkNumber, userId, isSecured) {
+  let tempDir = null;
+  let path = null;
   try {
     const fileId = `${folderId}-${fileUpload.filename}`;
     const { createReadStream, filename } = fileUpload;
     const stream = createReadStream();
     const imageId = generateUniqueString();
-    const tempDir = join(__dirname, "../public", "uploads/", fileId);
-    const path = join(__uploadDir, folderPath, filename);
+    tempDir = join(__dirname, "../public", "uploads/", fileId);
+    path = join(__uploadDir, folderPath, filename);
     const fileHasExist = await fs.existsSync(path);
 
     if (fileHasExist) {
@@ -49,7 +52,7 @@ async function uploadMultiChunks(fileUpload, folderId, folderPath, totalChunks, 
       // If there's an error writing the file, remove the partially written file
       // and reject the promise.
       writeStream.on('error', async (error) => {
-        await unlinkSync(tempDir);
+        await rimraf.sync(tempDir);
         await unlinkSync(path);
         reject(error);
       });
@@ -63,14 +66,25 @@ async function uploadMultiChunks(fileUpload, folderId, folderPath, totalChunks, 
       // remove temp dir
       await rimraf.sync(tempDir);
       const fileType = await FileType.fromFile(path);
-      const mimetype = fileType.mime;
-      const isImage = mimetype.split('/')[0] === 'image';
-      const isVideo = mimetype.split('/')[0] === 'video';
-      thumbnail = await createFileThumbnail(fileUpload, path, imageId, isImage, isVideo);
+      let mimetype = null;
+      let isImage = false;
+      let isVideo = false;
+      if (fileType) {
+        console.log(fileType);
+        mimetype = fileType.mime;
+        isImage = mimetype.split('/')[0] === 'image' && supportImageExt.includes(fileType.ext);
+        isVideo = mimetype.split('/')[0] === 'video';
+        thumbnail = await createFileThumbnail(fileUpload, path, imageId, isImage, isVideo);
+      }
       const { size } = statSync(path);
       return createNewFile(folderId, userId, { file_name: `${filename}`, type: mimetype, size, tags: [], is_video: isVideo, is_image: isImage, thumbnail }, isSecured);
     }
   } catch(error) {
+    if (tempDir && path) {
+      await unlinkSync(path);
+      await rimraf.sync(tempDir);
+    }
+
     console.log('general error', error);
     throw error;
   }

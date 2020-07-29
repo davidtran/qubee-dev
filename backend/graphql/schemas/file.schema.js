@@ -11,7 +11,7 @@ module.exports = gql`
   type File {
     id: String!
     file_name: String!
-    type: String!
+    type: String
     created_at: Date
     user: AuthorFile
     size: Int!

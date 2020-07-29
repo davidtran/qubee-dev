@@ -5,7 +5,7 @@ const fileSchema = new Schema({
   file_name: { type: String, required: true },
   user: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
   folder: { type: Schema.Types.ObjectId, required: false, ref: 'Folder' },
-  type: { type: String, required: true },
+  type: { type: String, required: false },
   restricted: { type: Boolean, required: true, default: false },
   size: { type: Number, required: true },
   tags: { type: [String], required: true, default: []},
