@@ -15,6 +15,7 @@ const {
 const {
   removeFilesByFolderIds
 } = require('../repository/file.repository');
+const rimraf = require("rimraf");
 
 async function createNewFolder(folderName, folderId, tags, userId, isHighLevel) {
   try {
@@ -82,7 +83,7 @@ async function removeFolderItem(folderIds, user) {
     const folderIdsToRemove = listFolderMapping.map(item => item.id);
     await removeFilesByFolderIds(folderIdsToRemove);
     await removeListFolderByIds(folderIdsToRemove);
-    folders.map((item) => rmdirSync(join(__uploadDir, item.path), { recursive: true }))
+    folders.map((item) => rimraf.sync(join(__uploadDir, item.path)))
     return true;
   } catch (error) {
     throw error;
