@@ -27,15 +27,17 @@ async function createNewFolder(folderName, folderId, tags, userId, isHighLevel) 
       }
       dirPath = folder.path;
     }
+
     const folderSlug = generateFolderSlug(folderName);
     if (!folderSlug) {
       throw new ApolloError('Folder slug is empty', STATUS_CONSTANT.NOT_FOUND_CODE);
     }
-    if (existsSync(`${__uploadDir}/${dirPath}/${folderSlug}`)) {
+    let fullDirPath = join(__uploadDir, dirPath, folderSlug);
+    if (existsSync(fullDirPath)) {
       throw new ApolloError("Folder is exist", STATUS_CONSTANT.CONFLICT_CODE);
     }
     const newFolder = await createNewFolderData({ name: folderName, folder: folderId, user: userId, path: `${dirPath}/${folderSlug}`, restricted: isHighLevel, tags });
-    mkdirSync(`${__uploadDir}/${dirPath}/${folderSlug}`);
+    mkdirSync(fullDirPath);
     return newFolder;
   } catch(error) {
     throw error;

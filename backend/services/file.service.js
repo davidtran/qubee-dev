@@ -282,7 +282,7 @@ async function getUploadProgress(folderId, folderPath, filename) {
     throw new ApolloError("File is existing", STATUS_CONSTANT.CONFLICT_CODE);
   }
 
-  const tempDir = join(__dirname, "../public", "uploads", tempFilename);
+  const tempDir = join(__dirname, "../temp", tempFilename);
   const tempFileExist = await fs.existsSync(tempDir);
 
   if (tempFileExist) {

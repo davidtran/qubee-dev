@@ -15,7 +15,7 @@ const { File, fileBasePath } = require("../models/file");
 const ffmpeg = require("fluent-ffmpeg");
 const imageThumbnail = require("image-thumbnail");
 
-const tempDir = join(__dirname, "../public", "uploads/");
+const tempDir = join(__dirname, "../temp");
 const uploadsFolder = join(__dirname, fileBasePath);
 
 const storage = MyCustomStorage({

@@ -34,7 +34,7 @@ export default function FileCardBody({ file, isSelected, isFile }) {
 
         // If it's a video file, set backgroundImage accordingly
         backgroundImage: isVideoOrImage
-          ? `url("/thumbnails/${file.thumbnail}")`
+          ? `url("${process.env.REACT_APP_API_URL}/thumbnails/${file.thumbnail}")`
           : "",
 
         backgroundSize: "cover",

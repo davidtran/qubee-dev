@@ -1,6 +1,8 @@
 {
   "name": "qubee - Development",
-  "db_dev": "mongodb://localhost:27017/test?serverSelectionTimeoutMS=5000&connectTimeoutMS=10000&3t.uriVersion=3&database=test",
+  "db_dev": "mongodb+srv://davidtranwd:Jslancer2020@cluster0-qmr7i.mongodb.net/qubee?retryWrites=true&w=majority",
   "port": "5000",
   "requiresAuth": false
 }
+
+

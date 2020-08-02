@@ -25,7 +25,7 @@ async function uploadMultiChunks(fileUpload, folderId, folderPath, totalChunks, 
     const { createReadStream, filename } = fileUpload;
     const stream = createReadStream();
     const imageId = generateUniqueString();
-    tempDir = join(__dirname, "../public", "uploads/", fileId);
+    tempDir = join(__dirname, "../temp", fileId);
     path = join(__uploadDir, folderPath, filename);
     const fileHasExist = await fs.existsSync(path);
 
@@ -80,12 +80,13 @@ async function uploadMultiChunks(fileUpload, folderId, folderPath, totalChunks, 
       return createNewFile(folderId, userId, { file_name: `${filename}`, type: mimetype, size, tags: [], is_video: isVideo, is_image: isImage, thumbnail }, isSecured);
     }
   } catch(error) {
+    console.log('general error', error);
     if (tempDir && path) {
       await unlinkSync(path);
       await rimraf.sync(tempDir);
     }
 
-    console.log('general error', error);
+
     throw error;
   }
 }

@@ -1,5 +1,6 @@
 {
-  "name": "qubee - Production",
+  "name": "qubee",
+  "db": "mongodb+srv://ci-vault-user:BVMH3Nmmsk79jnnZ@ci-vault-llhqy.mongodb.net/qubee?retryWrites=true&w=majority",
   "port": "5000",
   "requiresAuth": true
 }
